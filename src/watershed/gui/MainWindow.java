@@ -1,5 +1,7 @@
 package watershed.gui;
 
+import org.opencv.core.Core;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -8,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import watershed.algorithm.*;
 
 public class MainWindow extends Application {
     public MainWindow() {
@@ -33,8 +36,13 @@ public class MainWindow extends Application {
     @Override
     public void stop() {
     }
+    public static void main(String[] args) {
+        //launch(arguments);
+        System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+        new Watershed("resources/4.jpg");
+        System.exit(0);
 
-    public static void main(String[] arguments) {
-        launch(arguments);
+
     }
+
 }
