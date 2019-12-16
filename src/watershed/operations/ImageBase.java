@@ -1,4 +1,9 @@
 package watershed.operations;
 
-public class base {
+public class ImageBase {
+
+
+
+
+
 }
