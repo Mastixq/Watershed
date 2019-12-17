@@ -1,5 +1,6 @@
 package watershed.algorithm;
 
+import org.jetbrains.annotations.NotNull;
 import watershed.operations.Pixel;
 
 import org.opencv.core.*;
@@ -12,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.awt.Point;
 
 //Image image = SwingFXUtils.toFXImage(capture, null);
 public class Watershed {
@@ -36,29 +38,15 @@ public class Watershed {
         Mat gray = new Mat(srcOriginal.size(), CvType.CV_8U);
         Mat morph = new Mat(srcOriginal.size(), CvType.CV_8U);
 
-
-        Mat test1 = new Mat(srcOriginal.size(), CvType.CV_8U);
-        Mat test2 = new Mat(srcOriginal.size(), CvType.CV_8U);
-        Mat test3 = new Mat(srcOriginal.size(), CvType.CV_8U);
-        int kernelSize = 1;
-        Mat element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1),
-                new Point(kernelSize, kernelSize));
-
         Imgproc.cvtColor(srcOriginal,gray,Imgproc.COLOR_BGR2GRAY);
         //HighGui.imshow("Color2GRAY", gray);
         Imgproc.threshold(gray,processImg,0,255,Imgproc.THRESH_OTSU);
         //HighGui.imshow("THRESHOLD OTSU", processImg);
-        int morphKernel[][] = {{1,1,1},
-                    {1,1,1},
-                    {1,1,1}};
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
                 new  Size(2, 2));
-        //Imgproc.morphologyEx(processImg,morph,Imgproc.MORPH_OPEN,kernelMat);
-
         Imgproc.dilate(processImg,morph,kernel);
         Mat dst = new Mat();
         //HighGui.imshow("After dilate", morph);
-
 
         Imgproc.erode(morph,dst,kernel);
         //HighGui.imshow("After erode", dst);
@@ -68,23 +56,70 @@ public class Watershed {
         Mat normalized = new Mat();
         //Core.normalize(test, normalized, 0, 1., Core.NORM_MINMAX);
        // HighGui.imshow("After distancetrnsfm", normalized);
-        Imgcodecs.imwrite("resources/dstTransform.jpg",normalized);
+        Imgcodecs.imwrite("resources/dstTransform.jpg",test);
         //HighGui.waitKey( 0 );
-        System.out.println(test.get(23,231)[0]);
+        System.out.println(test.dump());
         return normalized;
     }
-    private Pixel[][] startMarkers(Mat src){
+    private Pixel[][] toPixelArray(@NotNull Mat src){
         int width = (int)src.size().width;
         int height = (int)src.size().height;
         Pixel[][] tmpArray = new Pixel[width][height];
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
-//                double[] test = src.get(width,height);
-                tmpArray[width][height] = new Pixel(Pixel.EMPTY, (int)src.get(width,height)[0],new java.awt.Point(width,height));
+               pixelArray[width][height] = new  Pixel(Pixel.EMPTY,
+                                                (int)src.get(width,height)[0],
+                                                new Point(width,height));
+               if (pixelArray[width][height].distance == 0.) {
+                   pixelArray[width][height].isMax = Pixel.NOTMAX;
+               }
             }
         }
-        return new Pixel[2][3];
+        return tmpArray;
     }
+    private void startMarkers(@NotNull Pixel[][] src){ //seed it
+        int width = src.length;
+        int height = src[0].length;
+        for (int i = 0 ; i < width ; i++){
+            for (int j = 0; j<height; j++){
+
+            }
+        }
+
+    }
+
+    private boolean isMax(@NotNull Pixel[][] src, int x, int y) {
+        int width = src.length;
+        int height = src[0].length;
+
+
+        if (x == width && y < height) {
+          //  src[x][y].distance > src[x][y + 1].distance ?
+        }
+        return true;
+    }
+/*
+        boolean checkifMax(array, position, prevMax)
+        if(notMax)
+            return true
+        foreach()
+                foreach(){
+                if(currentValue > prevMax)
+                    return false;
+                else if currentValue == prevMax && isChecked
+                   return checkIfMax(array, currentPosition, current);
+                else
+                    currPosition = checked,
+                    notMax
+                    return true
+
+
+        }
+    }
+
+        return true;
+    }
+    */
     private void watershedMarked(){}
 
     public static Mat BufferedImage2Mat(BufferedImage image) throws IOException {

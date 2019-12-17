@@ -8,7 +8,10 @@ public class Pixel {
     public Point pos;
     public double distance;
     public int state;
-    public boolean isMin;
+    public int isMax;
+    public final static int UNDEF = 0;
+    public final static int NOTMAX = 1;
+    public final static int MAX = 2;
 
     public static int nextSeed = 2;
     public final static int EMPTY = 0;
@@ -22,10 +25,12 @@ public class Pixel {
     }
 
     public Pixel(int state, int distance, Point pos){
-        this.isMin = false;
+        this.isMax = UNDEF;
+        this.state = state;
         this.distance = distance;
         this.pos = pos;
     }
+
 
 
     public int newSeed(){
