@@ -98,6 +98,39 @@ public class Watershed {
         }
         return true;
     }
+
+    boolean checkIfMax(Pixel[][] src, int p1, int p2, int prevMax){
+        //just to clarify and hold position
+        Pixel currPix = src[p1][p2];
+        currPix.isChecked = true;
+        if (currPix.isMax == Pixel.NOTMAX)
+            return false;
+        int sizeX = src.length;
+        int sizeY = src[0].length;
+        for(int i=-1;i<2;i++){
+            for(int j=-1;j<2;j++){
+                int x = p1 + i;
+                int y = p2 + j;
+                Pixel neighbouringPix = src[x][y];
+
+                if(x<0 || x>sizeX-1 || y<0 || y>sizeY-1)
+                    continue;
+                else if(neighbouringPix.state==0 ||neighbouringPix.state==1)
+                    continue;
+                else{
+                        if(neighbouringPix.isChecked == false || neighbouringPix.distance > currPix.distance) {
+                            if (!checkIfMax(src, x, y, prevMax))
+                                return false;
+                        }
+                    }
+
+                }
+
+            }
+        return true;
+    }
+
+
 /*
         boolean checkifMax(array, position, prevMax)
         if(notMax)
