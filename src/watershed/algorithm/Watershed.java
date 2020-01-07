@@ -1,6 +1,5 @@
 package watershed.algorithm;
 
-import org.jetbrains.annotations.NotNull;
 import watershed.operations.Pixel;
 
 import org.opencv.core.*;
@@ -28,10 +27,10 @@ public class Watershed {
         }
         Mat processsed = new Mat();
         processsed = initialProcess(srcOriginal);
-        transformToPixelArray(srcOriginal);
-    }
-    private void transformToPixelArray(Mat src) {
-
+        pixelArray = toPixelArray(srcOriginal);
+        startMarkers(pixelArray);
+        System.out.println(Pixel.nextSeed);
+        System.out.println("end markers");
     }
     private Mat initialProcess(Mat srcOriginal) {
         processImg = srcOriginal.clone();
@@ -61,98 +60,91 @@ public class Watershed {
         System.out.println(test.dump());
         return normalized;
     }
-    private Pixel[][] toPixelArray(@NotNull Mat src){
+
+    private Pixel[][] toPixelArray(Mat src){
         int width = (int)src.size().width;
         int height = (int)src.size().height;
-        Pixel[][] tmpArray = new Pixel[width][height];
+        System.out.println(width);
+        System.out.println(height);
+        Pixel[][] pixelArray = new Pixel[height][width];
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
-               pixelArray[width][height] = new  Pixel(Pixel.EMPTY,
-                                                (int)src.get(width,height)[0],
-                                                new Point(width,height));
-               if (pixelArray[width][height].distance == 0.) {
-                   pixelArray[width][height].isMax = Pixel.NOTMAX;
-               }
+                int distance = (int)src.get(j,i)[0];
+                Point tmpPoint = new Point(j,i);
+                pixelArray[j][i] = new  Pixel(Pixel.EMPTY,              //all empty at initialize
+                                                distance,  //
+                                                tmpPoint);
+                if (pixelArray[j][i].distance == 0.) {
+                }
             }
         }
-        return tmpArray;
+        return pixelArray;
     }
-    private void startMarkers(@NotNull Pixel[][] src){ //seed it
+
+    /**
+     * Function responsible for creating one point markers
+     * for each local maximum in topographic distance
+     * @param src 2dimensional array of pixel containing preprocessed image
+     */
+    private void startMarkers(Pixel[][] src){ //seed it
         int width = src.length;
         int height = src[0].length;
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
-
+                Pixel currPix = src[i][j];
+                //we only need to check each pixel once
+                if(currPix.isChecked) {
+                    continue;
+                }
+                if(checkIfMax(src,i,j)){
+                    System.out.println("Hello");
+                    currPix.newSeed();
+                }
             }
         }
 
     }
 
-    private boolean isMax(@NotNull Pixel[][] src, int x, int y) {
-        int width = src.length;
-        int height = src[0].length;
-
-
-        if (x == width && y < height) {
-          //  src[x][y].distance > src[x][y + 1].distance ?
-        }
-        return true;
-    }
-
-    boolean checkIfMax(Pixel[][] src, int p1, int p2, int prevMax){
-        //just to clarify and hold position
+    /**
+     * IMPORTANT isChecked flag must set to false before entering this function
+     * because it's just a helper recurrence function
+     * @param src
+     * @param p1
+     * @param p2
+     * @return checked if given pixel is local maxima of topographic distance
+     */
+    boolean checkIfMax(Pixel[][] src, int p1, int p2)
+    {
         Pixel currPix = src[p1][p2];
         currPix.isChecked = true;
-        if (currPix.isMax == Pixel.NOTMAX)
-            return false;
         int sizeX = src.length;
         int sizeY = src[0].length;
-        for(int i=-1;i<2;i++){
-            for(int j=-1;j<2;j++){
+        for(int i=-1;i<2;i++)
+        {
+            for(int j=-1;j<2;j++)
+            {
                 int x = p1 + i;
                 int y = p2 + j;
-                Pixel neighbouringPix = src[x][y];
 
                 if(x<0 || x>sizeX-1 || y<0 || y>sizeY-1)
                     continue;
-                else if(neighbouringPix.state==0 ||neighbouringPix.state==1)
+
+                Pixel neighbouringPix = src[x][y];
+                if(neighbouringPix.state==0 || neighbouringPix.state==1)
                     continue;
-                else{
-                        if(neighbouringPix.isChecked == false || neighbouringPix.distance > currPix.distance) {
-                            if (!checkIfMax(src, x, y, prevMax))
+                else
+                    {
+                        //just in case it's false-positive max pixel, search neighbouring pixels for any other maxima
+                        if(neighbouringPix.isChecked == false || neighbouringPix.distance == currPix.distance) {
+                            if (!checkIfMax(src, x, y))
                                 return false;
                         }
                     }
-
                 }
-
             }
         return true;
     }
 
-
-/*
-        boolean checkifMax(array, position, prevMax)
-        if(notMax)
-            return true
-        foreach()
-                foreach(){
-                if(currentValue > prevMax)
-                    return false;
-                else if currentValue == prevMax && isChecked
-                   return checkIfMax(array, currentPosition, current);
-                else
-                    currPosition = checked,
-                    notMax
-                    return true
-
-
-        }
-    }
-
-        return true;
-    }
-    */
     private void watershedMarked(){}
 
     public static Mat BufferedImage2Mat(BufferedImage image) throws IOException {
