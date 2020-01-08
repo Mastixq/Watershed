@@ -12,6 +12,8 @@ import javafx.stage.Stage;
 
 import watershed.algorithm.*;
 
+import java.io.IOException;
+
 public class MainWindow extends Application {
     public MainWindow() {
     }
@@ -36,7 +38,7 @@ public class MainWindow extends Application {
     @Override
     public void stop() {
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         //launch(arguments);
         System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
         new Watershed("resources/4.jpg");

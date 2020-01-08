@@ -8,18 +8,22 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.awt.Point;
+import java.util.HashMap;
+import java.util.Map;
 
 //Image image = SwingFXUtils.toFXImage(capture, null);
 public class Watershed {
     private Mat processImg;
     private Pixel[][] pixelArray;
 
-    public Watershed(String filename) {
+    public Watershed(String filename) throws IOException {
         Mat srcOriginal = Imgcodecs.imread(filename);
         if (srcOriginal.empty()) {
             System.err.println("Cannot read image: " + filename);
@@ -31,6 +35,8 @@ public class Watershed {
         startMarkers(pixelArray);
         System.out.println(Pixel.nextSeed);
         System.out.println("end markers");
+        HashMap<Integer,Color> colorMap = Pixel.colorMap;
+        save(pixelArray,pixelArray.length,pixelArray[0].length);
     }
     private Mat initialProcess(Mat srcOriginal) {
         processImg = srcOriginal.clone();
@@ -48,7 +54,7 @@ public class Watershed {
         //HighGui.imshow("After dilate", morph);
 
         Imgproc.erode(morph,dst,kernel);
-        //HighGui.imshow("After erode", dst);
+        HighGui.imshow("After erode", dst);
 
         Mat test = new Mat();
         Imgproc.distanceTransform(dst, test, 2, 3);
@@ -56,9 +62,9 @@ public class Watershed {
         //Core.normalize(test, normalized, 0, 1., Core.NORM_MINMAX);
        // HighGui.imshow("After distancetrnsfm", normalized);
         Imgcodecs.imwrite("resources/dstTransform.jpg",test);
-        //HighGui.waitKey( 0 );
-        System.out.println(test.dump());
-        return normalized;
+        HighGui.waitKey( 0 );
+        System.out.println(normalized.dump());
+        return test;
     }
 
     private Pixel[][] toPixelArray(Mat src){
@@ -66,15 +72,21 @@ public class Watershed {
         int height = (int)src.size().height;
         System.out.println(width);
         System.out.println(height);
+        System.out.println();
+        System.out.println();
+        System.out.println(src.dump());
         Pixel[][] pixelArray = new Pixel[height][width];
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
-                int distance = (int)src.get(j,i)[0];
+                double distance = (double)src.get(j,i)[0];
                 Point tmpPoint = new Point(j,i);
                 pixelArray[j][i] = new  Pixel(Pixel.EMPTY,              //all empty at initialize
                                                 distance,  //
                                                 tmpPoint);
-                if (pixelArray[j][i].distance == 0.) {
+                if (pixelArray[j][i].distance == (double)0) {
+                    System.out.println("0.0");
+                    pixelArray[j][i].isChecked = true;
+                    pixelArray[j][i].state = Pixel.BORDER;
                 }
             }
         }
@@ -97,8 +109,9 @@ public class Watershed {
                     continue;
                 }
                 if(checkIfMax(src,i,j)){
-                    System.out.println("Hello");
-                    currPix.newSeed();
+                    //System.out.println("Marking for distance: "+currPix.distance);
+                    //System.out.println("With position x:"+i+" y:"+j);
+                    currPix.state=Pixel.newSeed();
                 }
             }
         }
@@ -130,12 +143,15 @@ public class Watershed {
                     continue;
 
                 Pixel neighbouringPix = src[x][y];
+
+                if(neighbouringPix.distance > currPix.distance)
+                    return false;
                 if(neighbouringPix.state==0 || neighbouringPix.state==1)
                     continue;
                 else
                     {
                         //just in case it's false-positive max pixel, search neighbouring pixels for any other maxima
-                        if(neighbouringPix.isChecked == false || neighbouringPix.distance == currPix.distance) {
+                        if(neighbouringPix.isChecked == false && neighbouringPix.distance == currPix.distance) {
                             if (!checkIfMax(src, x, y))
                                 return false;
                         }
@@ -158,4 +174,18 @@ public class Watershed {
         Imgcodecs.imencode(".jpg", matrix, mob);
         return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
     }
+
+    BufferedImage save(Pixel[][] src, int width, int height) throws IOException{
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int rgb=Pixel.colorMap.get((pixelArray[i][j].state)).getRGB();
+                newImage.setRGB(i, j, rgb);
+            }
+        }
+        File outfile = new File("lastResult.png");
+        ImageIO.write(newImage, "png", outfile);
+        return newImage;
+    }
 }
+
