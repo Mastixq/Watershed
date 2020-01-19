@@ -27,7 +27,17 @@ public class Pixel {
         this.distance = distance;
         this.pos = pos;
     }
+    public Pixel(int state, double distance, Point pos, Color color){
+        this.isChecked = false;
+        this.state = state;
+        this.distance = distance;
+        this.pos = pos;
 
+    }
+    public static int newSeed(Color color){
+        colorMap.put(nextSeed,color);
+        return nextSeed++;
+    }
 
 
     public static int newSeed(){
