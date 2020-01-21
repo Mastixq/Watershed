@@ -49,7 +49,21 @@ public class Watershed {
         processImg = srcOriginal.clone();
         Mat gray = new Mat(srcOriginal.size(), CvType.CV_8U);
         Mat morph = new Mat(srcOriginal.size(), CvType.CV_8U);
+        Mat laplace = new Mat();
 
+
+
+        Mat blur = new Mat();
+        Imgproc.blur(srcOriginal,blur,new Size(3,3));
+       // Imgproc.blur(blur,blur,new Size(3,3));
+       // Imgproc.blur(blur,blur,new Size(3,3));
+        HighGui.imshow("src",srcOriginal);
+        HighGui.imshow("blur",blur);
+        Imgproc.Laplacian(blur,laplace,srcOriginal.depth());
+
+        Imgproc.cvtColor(laplace,laplace,Imgproc.COLOR_BGR2GRAY);
+        Imgproc.threshold(laplace,blur,0,255,Imgproc.THRESH_OTSU);
+        HighGui.imshow("laplace", laplace);
         Imgproc.cvtColor(srcOriginal,gray,Imgproc.COLOR_BGR2GRAY);
         //HighGui.imshow("Color2GRAY", gray);
         Imgproc.threshold(gray,processImg,0,255,Imgproc.THRESH_OTSU);
@@ -206,12 +220,13 @@ public class Watershed {
 
                     counterIsChecked++;
                 }
-                if(neighbouringPix.state==0 || neighbouringPix.state==1)
+                if(neighbouringPix.state==1)
                     continue;
+
                 else
                 {
                     //just in case it's false-positive max pixel, search neighbouring pixels for any other maxima
-                    if(neighbouringPix.isChecked == false && neighbouringPix.distance >= currPix.distance) {
+                    if(neighbouringPix.isChecked == false && neighbouringPix.distance == currPix.distance) {
                         if (!checkIfMax(src, x, y))
                             returnFlag = false;
                     }
@@ -227,7 +242,9 @@ public class Watershed {
         return returnFlag;
     }
 
-    private void watershedMarked(){}
+    private void watershedMarked(){
+
+    }
 
     public static Mat BufferedImage2Mat(BufferedImage image) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -253,5 +270,7 @@ public class Watershed {
         ImageIO.write(newImage, "png", outfile);
         return newImage;
     }
+
+
 }
 
