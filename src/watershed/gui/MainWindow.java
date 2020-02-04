@@ -42,13 +42,11 @@ public class MainWindow extends Application {
         //launch(arguments);
         System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
         System.out.println("entering watershed:");
-        new Watershed("resources/4.jpg");
+        new Watershed("resources/small.jpg");
         System.out.println("leaving watershed");
         System.exit(0);
 
 
     }
-
-
 
 }

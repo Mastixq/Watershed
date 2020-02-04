@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ImageBase {
+
     public static Mat BufferedImage2Mat(BufferedImage image) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ImageIO.write(image, "jpg", byteArrayOutputStream);
@@ -48,7 +49,6 @@ public class ImageBase {
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
                 int distance = (int)(src.get(j,i)[0]*255);
-                System.out.print(distance+" ");
                 Point tmpPoint = new Point(i,j);
                 pixelArray[i][j] = new  Pixel(Pixel.EMPTY,
                         distance,
@@ -62,6 +62,7 @@ public class ImageBase {
         }
         return pixelArray;
     }
+
     public static Mat initialProcess(Mat srcOriginal) {
         Mat processImg = new Mat();
         Mat gray = new Mat();
