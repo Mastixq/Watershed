@@ -50,8 +50,8 @@ public class ImageBase {
                 int distance = (int)(src.get(j,i)[0]*255);
                 System.out.print(distance+" ");
                 Point tmpPoint = new Point(i,j);
-                pixelArray[i][j] = new  Pixel(Pixel.EMPTY,              //all empty at initialize
-                        distance,  //
+                pixelArray[i][j] = new  Pixel(Pixel.EMPTY,
+                        distance,
                         tmpPoint,
                         new Color(distance,distance,distance));
                 if (pixelArray[i][j].distance == (double)0) {
@@ -67,46 +67,30 @@ public class ImageBase {
         Mat gray = new Mat();
         Mat morph = new Mat();
         Mat laplace = new Mat();
-
-
-
         Mat blur = new Mat();
-        Imgproc.blur(srcOriginal,blur,new Size(3,3));
-        // Imgproc.blur(blur,blur,new Size(3,3));
-        // Imgproc.blur(blur,blur,new Size(3,3));
-        HighGui.imshow("src",srcOriginal);
-        HighGui.imshow("blur",blur);
-        Imgproc.Laplacian(blur,laplace,srcOriginal.depth());
 
+        Imgproc.blur(srcOriginal,blur,new Size(3,3));
+        Imgproc.Laplacian(blur,laplace,srcOriginal.depth());
         Imgproc.cvtColor(laplace,laplace,Imgproc.COLOR_BGR2GRAY);
-        //Imgproc.threshold(laplace,blur,0,255,Imgproc.THRESH_OTSU);
-        HighGui.imshow("laplace", laplace);
         Imgproc.cvtColor(srcOriginal,gray,Imgproc.COLOR_BGR2GRAY);
-        //HighGui.imshow("Color2GRAY", gray);
         Imgproc.threshold(gray,processImg,0,255,Imgproc.THRESH_OTSU);
-        //HighGui.imshow("THRESHOLD OTSU", processImg);
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
                 new  Size(2, 2));
         Imgproc.dilate(processImg,morph,kernel);
         Mat dst = new Mat();
-        //HighGui.imshow("After dilate", morph);
-
         Imgproc.erode(morph,dst,kernel);
-        HighGui.imshow("After erode", dst);
         Mat inverted = new Mat();
         Core.bitwise_not(dst,inverted);
         Mat test = new Mat();
-
         Imgproc.distanceTransform(inverted, test, 1, 3);
         Mat normalized = new Mat();
-        Core.normalize(test, normalized, 0, 1., Core.NORM_MINMAX);
 
-        //Imgproc.sqrBoxFilter(normalized, );
-        //HighGui.imshow("After distancetrnsfm", normalized);
-        Imgcodecs.imwrite("resources/dstTransform.jpg",test);
+        HighGui.imshow("src",srcOriginal);
+        HighGui.imshow("blur",blur);
+        HighGui.imshow("laplace", laplace);
+        HighGui.imshow("After erode", dst);
         HighGui.waitKey( 0 );
-        System.out.println("Normalized: ");
-        System.out.println(normalized.dump());
+        Core.normalize(test, normalized, 0, 1., Core.NORM_MINMAX);
         return normalized;
     }
 }
