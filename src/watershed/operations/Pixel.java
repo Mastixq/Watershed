@@ -1,6 +1,7 @@
 package watershed.operations;
 
 import java.awt.*;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -27,18 +28,18 @@ public class Pixel {
         this.distance = distance;
         this.pos = pos;
     }
+
     public Pixel(int state, double distance, Point pos, Color color){
         this.isChecked = false;
         this.state = state;
         this.distance = distance;
         this.pos = pos;
-
     }
+
     public static int newSeed(Color color){
         colorMap.put(nextSeed,color);
         return nextSeed++;
     }
-
 
     public static int newSeed(){
         Random gen = new Random();
@@ -46,5 +47,12 @@ public class Pixel {
         colorMap.put(nextSeed,nextColor);
         return nextSeed++;
     }
+
+    public static Comparator<Pixel> distanceComparator = new Comparator<Pixel>() {
+        @Override
+        public int compare(Pixel p1, Pixel p2) {
+            return (int) (p2.distance - p1.distance);
+        }
+    };
 
 }

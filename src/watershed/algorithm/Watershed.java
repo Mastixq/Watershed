@@ -9,6 +9,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 
 //Image image = SwingFXUtils.toFXImage(capture, null);
@@ -17,8 +18,9 @@ public class Watershed {
     private Pixel[][] pixelArray;
     private int width, height;
 
+    HashSet<Pixel> pixelSet;
+    PriorityQueue<Pixel> queue;
     public Watershed(String filename) throws IOException {
-        PriorityQueue<Pixel> queue = new PriorityQueue<Pixel>();
         Mat srcImage = Imgcodecs.imread(filename);
         if (srcImage.empty()) {
             System.err.println("Cannot read image: " + filename);
@@ -29,11 +31,17 @@ public class Watershed {
         Mat processed = ImageBase.initialProcess(srcImage);
         pixelArray = ImageBase.toPixelArray(processed);
         ImageBase.save(pixelArray,width,height, "processed.png");
+
+        pixelSet = new HashSet<>();
+        queue = new PriorityQueue<>(Pixel.distanceComparator);
         startDistanceMarkers(pixelArray);
+        ImageBase.exportDataToExcel("test.csv", pixelArray);
+        watershedMarked();
         System.out.println("end markers");
 
         HashMap<Integer,Color> colorMap = Pixel.colorMap;
         ImageBase.save(pixelArray,pixelArray.length,pixelArray[0].length, "marked.png");
+
     }
 
     /**
@@ -44,14 +52,20 @@ public class Watershed {
     private void startDistanceMarkers(Pixel[][] src){ //seed it
         int width = src.length;
         int height = src[0].length;
+        int counter = 0;
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
                 Pixel currPix = src[i][j];
                 if(checkIfMaxDistance(src,i,j)){
                     currPix.state=Pixel.newSeed();
+                    counter++;
+                    addNeighbouringToQueue(i,j);
                 }
             }
         }
+        System.out.println(counter);
+        System.out.println("Last seed: "+Pixel.nextSeed);
+
     }
 
     /**
@@ -161,11 +175,40 @@ public class Watershed {
     }
 
     private void watershedMarked(){
+        while(!queue.isEmpty()){
+            Pixel currPix = queue.remove();
+            int stateCandidate = -1;
+            for(int i=-1;i<2;i++) {
+                for (int j = -1; j < 2; j++) {
+                    int p1 = currPix.pos.x + i;
+                    int p2 = currPix.pos.y + j;
+                    if(p1<0 || p1>width-1 || p2<0 || p2>height-1)
+                        continue;
+                    if(i==0 && j == 0)
+                        continue;
+                    Pixel processingPix = pixelArray[p1][p2];
+                    if (processingPix.state == Pixel.EMPTY || processingPix.state == Pixel.BORDER)
+                        continue;
+                    if (stateCandidate == -1)
+                        stateCandidate = processingPix.state;
+                    if (stateCandidate != processingPix.state)
+                        stateCandidate = processingPix.BORDER;
+                }
+            }
+            if (stateCandidate == -1){
+                stateCandidate = Pixel.EMPTY;
+            }
+            currPix.state = stateCandidate;
+            addNeighbouringToQueue(currPix.pos.x, currPix.pos.y);
+
+
+        }
 
     }
     private void watershedGradient(){
 
     }
+
     //TODO dodawanie do kolejki pustych pixeli wokol ziaren
     //Priority queue by distance
     private void addNeighbouringToQueue(int x, int y){
@@ -181,10 +224,24 @@ public class Watershed {
                 if(i==0 && j == 0){
                     continue;
                 }
+                Pixel currPix = pixelArray[p1][p2];
 
+                if ( pixelArray[p1][p2].state == 0) {
+                    if (pixelSet.add(currPix)){
+                        queue.add(currPix);
+                    }
+                    else{
+                        continue;
+                    }
+                }
 
             }
         }
     }
+    //TODO remove straight lines
+
+    //TODO remove end of the lines (only 1 in moore)
+
+    //TODO create markers on blured image, but place them on morphology separately
 }
 

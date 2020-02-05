@@ -1,5 +1,6 @@
 package watershed.operations;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -9,10 +10,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class ImageBase {
 
@@ -39,7 +37,7 @@ public class ImageBase {
         }
         File outfile = new File(filename);
         ImageIO.write(newImage, "png", outfile);
-        return newImage;
+        return ( BufferedImage)newImage;
     }
 
     public static Pixel[][] toPixelArray(Mat src){
@@ -48,12 +46,12 @@ public class ImageBase {
         Pixel[][] pixelArray = new Pixel[width][height];
         for (int i = 0 ; i < width ; i++){
             for (int j = 0; j<height; j++){
-                int distance = (int)(src.get(j,i)[0]*255);
+                double distance = (src.get(j,i)[0]);
                 Point tmpPoint = new Point(i,j);
                 pixelArray[i][j] = new  Pixel(Pixel.EMPTY,
                         distance,
                         tmpPoint,
-                        new Color(distance,distance,distance));
+                        new Color((int)distance,(int)distance,(int)distance));
                 if (pixelArray[i][j].distance == (double)0) {
                     pixelArray[i][j].isChecked = true;
                     pixelArray[i][j].state = Pixel.BORDER;
@@ -71,9 +69,12 @@ public class ImageBase {
         Mat blur = new Mat();
 
         Imgproc.blur(srcOriginal,blur,new Size(3,3));
-        Imgproc.Laplacian(blur,laplace,srcOriginal.depth());
-        Imgproc.cvtColor(laplace,laplace,Imgproc.COLOR_BGR2GRAY);
-        Imgproc.cvtColor(srcOriginal,gray,Imgproc.COLOR_BGR2GRAY);
+       // Imgproc.Laplacian(blur,laplace,srcOriginal.depth());
+        //Imgproc.cvtColor(laplace,laplace,Imgproc.COLOR_BGR2GRAY);
+        Imgproc.blur(blur,blur,new Size(3,3));
+
+
+        Imgproc.cvtColor(blur,gray,Imgproc.COLOR_BGR2GRAY);
         Imgproc.threshold(gray,processImg,0,255,Imgproc.THRESH_OTSU);
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
                 new  Size(2, 2));
@@ -85,13 +86,44 @@ public class ImageBase {
         Mat test = new Mat();
         Imgproc.distanceTransform(inverted, test, 1, 3);
         Mat normalized = new Mat();
-
-        HighGui.imshow("src",srcOriginal);
-        HighGui.imshow("blur",blur);
-        HighGui.imshow("laplace", laplace);
-        HighGui.imshow("After erode", dst);
-        HighGui.waitKey( 0 );
+//
+//        HighGui.imshow("src",srcOriginal);
+//        HighGui.imshow("blur",blur);
+//        HighGui.imshow("laplace", laplace);
+//        HighGui.imshow("After erode", dst);
+//        HighGui.waitKey( 0 );
         Core.normalize(test, normalized, 0, 1., Core.NORM_MINMAX);
-        return normalized;
+        return test;
+    }
+
+    public static void exportDataToExcel(String fileName, Pixel[][] data) throws FileNotFoundException, IOException
+    {
+        File file = new File(fileName);
+        if (!file.isFile())
+            file.createNewFile();
+
+        CSVWriter csvWriter = new CSVWriter(new FileWriter(file),';',
+            CSVWriter.NO_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            CSVWriter.DEFAULT_LINE_END);
+
+        int rowCount = data.length;
+
+        for (int i = 0; i < rowCount; i++)
+        {
+            int columnCount = data[i].length;
+            String[] values = new String[columnCount];
+            for (int j = 0; j < columnCount; j++)
+            {
+                values[j] = data[i][j].distance + "";
+                if ( data[i][j].state >1){
+                    values[j]+="XDDDDDDD";
+                }
+            }
+            csvWriter.writeNext(values);
+        }
+
+        csvWriter.flush();
+        csvWriter.close();
     }
 }
