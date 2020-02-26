@@ -4,7 +4,6 @@ import org.opencv.core.Core;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
@@ -42,7 +41,7 @@ public class MainWindow extends Application {
         //launch(arguments);
         System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
         System.out.println("entering watershed:");
-        new Watershed("resources/small.jpg");
+        new GradientWatershed("resources/4.jpg");
         System.out.println("leaving watershed");
         System.exit(0);
 

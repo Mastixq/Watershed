@@ -2,56 +2,44 @@ package watershed.operations;
 
 import java.awt.*;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Random;
 
 public class Pixel {
     public Point pos;
-    public double distance;
+    public double value;
     public int state;
     public boolean isChecked;
 
-    public static int nextSeed = 2;
+
+
+    public Color color;
+
     public final static int EMPTY = 0;
     public final static int BORDER = 1;
-    public static HashMap<Integer,Color> colorMap;
 
-    static{
-        colorMap = new HashMap();
-        colorMap.put(0, Color.white);
-        colorMap.put(1, Color.black);
-    }
 
-    public Pixel(int state, double distance, Point pos){
+    public Pixel(int state, double value, Point pos){
         this.isChecked = false;
         this.state = state;
-        this.distance = distance;
+        this.value = value;
         this.pos = pos;
     }
 
-    public Pixel(int state, double distance, Point pos, Color color){
+    public Pixel(int state, double value, Point pos, Color color){
         this.isChecked = false;
         this.state = state;
-        this.distance = distance;
+        this.value = value;
         this.pos = pos;
+        this.color = color;
     }
 
-    public static int newSeed(Color color){
-        colorMap.put(nextSeed,color);
-        return nextSeed++;
-    }
 
-    public static int newSeed(){
-        Random gen = new Random();
-        Color nextColor = new Color(gen.nextInt(256),gen.nextInt(256),gen.nextInt(256));
-        colorMap.put(nextSeed,nextColor);
-        return nextSeed++;
-    }
+
+
 
     public static Comparator<Pixel> distanceComparator = new Comparator<Pixel>() {
         @Override
         public int compare(Pixel p1, Pixel p2) {
-            return (int) (p2.distance - p1.distance);
+            return (int) (p2.value - p1.value);
         }
     };
 
