@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Map;
 
-public class ImageBase {
+public abstract class BaseOperations {
 
     public static Mat BufferedImage2Mat(BufferedImage image) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -26,7 +26,7 @@ public class ImageBase {
         return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
     }
 
-    public static BufferedImage save(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
+    public BufferedImage save(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -36,23 +36,11 @@ public class ImageBase {
         }
         File outfile = new File(filename);
         ImageIO.write(newImage, "png", outfile);
-        return (BufferedImage) newImage;
+        return newImage;
     }
 
-    public static BufferedImage saveGradient(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
-        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                int rgb = src[i][j].color.getRGB();
-                newImage.setRGB(i, j, rgb);
-            }
-        }
-        File outfile = new File(filename);
-        ImageIO.write(newImage, "png", outfile);
-        return (BufferedImage) newImage;
-    }
 
-    public static Pixel[][] toPixelArrayTopographic(Mat src) {
+    public Pixel[][] toPixelArray(Mat src) {
         int width = (int) src.size().width;
         int height = (int) src.size().height;
         Pixel[][] pixelArray = new Pixel[width][height];
@@ -91,6 +79,7 @@ public class ImageBase {
                 }
             }
         }
-
     }
+
+    public abstract Mat preprocess(Mat srcMat);
 }

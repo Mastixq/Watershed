@@ -2,7 +2,7 @@ package watershed.algorithm;
 
 import org.opencv.imgproc.Imgproc;
 import watershed.operations.Pixel;
-import watershed.operations.ImageBase;
+import watershed.operations.BaseOperations;
 
 import org.opencv.core.*;
 
@@ -13,11 +13,11 @@ public class TopographicWatershed extends BaseWatershed {
 
     public TopographicWatershed(String filename) throws IOException {
         super(filename);
-        pixelArray = ImageBase.toPixelArrayTopographic(processedImg);
-        ImageBase.save(pixelArray, width, height, "processed.png", colorMap);
+        pixelArray = BaseOperations.toPixelArrayTopographic(processedImg);
+        BaseOperations.save(pixelArray, width, height, "processed.png", colorMap);
         startDistanceMarkers(pixelArray);
         calculate();
-        ImageBase.save(pixelArray, pixelArray.length, pixelArray[0].length, "marked.png", colorMap);
+        BaseOperations.save(pixelArray, pixelArray.length, pixelArray[0].length, "marked.png", colorMap);
 
     }
 

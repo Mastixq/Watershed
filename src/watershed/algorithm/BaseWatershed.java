@@ -2,7 +2,7 @@ package watershed.algorithm;
 
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
-import watershed.operations.ImageBase;
+import watershed.operations.BaseOperations;
 import watershed.operations.Pixel;
 
 import java.awt.*;
@@ -12,17 +12,19 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 public abstract class BaseWatershed {
-    protected Mat processedImg;
-    protected Mat srcImage;
-    protected Pixel[][] pixelArray;
+    Mat processedImg;
+    Mat srcImage;
+    Pixel[][] pixelArray;
 
-    protected int width, height;
+    int width, height;
 
     public HashMap<Integer, Color> colorMap;
     public int nextSeed = 2;
 
-    protected HashSet<Pixel> pixelSet;
-    protected PriorityQueue<Pixel> queue;
+    HashSet<Pixel> pixelSet;
+    PriorityQueue<Pixel> queue;
+
+    BaseOperations operations;
 
     private BaseWatershed() {
         System.out.println("0 arguments constructor can't be called");
@@ -37,7 +39,7 @@ public abstract class BaseWatershed {
         width = (int) srcImage.size().width;
         height = (int) srcImage.size().height;
 
-        processedImg = preprocess(srcImage);
+        processedImg = operations.preprocess(srcImage);
 
 
         pixelSet = new HashSet<>();
@@ -49,9 +51,6 @@ public abstract class BaseWatershed {
     }
 
     public abstract void calculate();
-
-    protected abstract Mat preprocess(Mat srcMat);
-
 
     //TODO dodawanie do kolejki pustych pixeli wokol ziaren
     //Priority queue by distance
