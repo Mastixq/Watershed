@@ -34,12 +34,17 @@ public class Pixel {
 
 
 
-
-
     public static Comparator<Pixel> distanceComparator = new Comparator<Pixel>() {
         @Override
         public int compare(Pixel p1, Pixel p2) {
             return (int) (p2.value - p1.value);
+        }
+    };
+
+    public static Comparator<Pixel> distanceMinimaComparator = new Comparator<Pixel>() {
+        @Override
+        public int compare(Pixel p1, Pixel p2) {
+            return (int) (p1.value - p2.value);
         }
     };
 

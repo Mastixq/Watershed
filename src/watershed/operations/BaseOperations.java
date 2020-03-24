@@ -13,6 +13,15 @@ import java.util.Map;
 
 public abstract class BaseOperations {
 
+    int width, height;
+
+    public BaseOperations(int width, int height){
+        this.width = width;
+        this.height = height;
+    }
+
+    private BaseOperations(){};
+
     public static Mat BufferedImage2Mat(BufferedImage image) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ImageIO.write(image, "jpg", byteArrayOutputStream);
@@ -39,6 +48,41 @@ public abstract class BaseOperations {
         return newImage;
     }
 
+    public BufferedImage saveStateOverlay(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                Pixel currPix = src[i][j];
+                int rgb;
+                if (currPix.state > 0)
+                    rgb = colorMap.get((src[i][j].state)).getRGB();
+                else
+                    rgb = new Color((int)currPix.value,(int)currPix.value,(int)currPix.value).getRGB();
+                newImage.setRGB(i, j, rgb);
+            }
+        }
+        File outfile = new File(filename);
+        ImageIO.write(newImage, "png", outfile);
+        return newImage;
+    }
+
+    public BufferedImage saveBorderOverlay(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                Pixel currPix = src[i][j];
+                int rgb;
+                if (currPix.state == Pixel.BORDER)
+                    rgb = Color.GREEN.getRGB();
+                else
+                    rgb = new Color((int)currPix.value,(int)currPix.value,(int)currPix.value).getRGB();
+                newImage.setRGB(i, j, rgb);
+            }
+        }
+        File outfile = new File(filename);
+        ImageIO.write(newImage, "png", outfile);
+        return newImage;
+    }
 
     public Pixel[][] toPixelArray(Mat src) {
         int width = (int) src.size().width;

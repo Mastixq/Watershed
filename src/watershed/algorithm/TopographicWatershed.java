@@ -5,6 +5,7 @@ import watershed.operations.Pixel;
 import watershed.operations.BaseOperations;
 
 import org.opencv.core.*;
+import watershed.operations.TopographicOperations;
 
 import java.io.IOException;
 
@@ -13,11 +14,12 @@ public class TopographicWatershed extends BaseWatershed {
 
     public TopographicWatershed(String filename) throws IOException {
         super(filename);
-        pixelArray = BaseOperations.toPixelArrayTopographic(processedImg);
-        BaseOperations.save(pixelArray, width, height, "processed.png", colorMap);
-        startDistanceMarkers(pixelArray);
+        operations = new TopographicOperations(width,height);
+        pixelArray = operations.toPixelArray(processedImg);
+        operations.save(pixelArray, width, height, "processed.png", colorMap);
+        startMarkers(pixelArray);
         calculate();
-        BaseOperations.save(pixelArray, pixelArray.length, pixelArray[0].length, "marked.png", colorMap);
+        operations.save(pixelArray, pixelArray.length, pixelArray[0].length, "marked.png", colorMap);
 
     }
 
@@ -30,7 +32,8 @@ public class TopographicWatershed extends BaseWatershed {
      *
      * @param src 2-dimensional array of pixel containing preprocessed image
      */
-    private void startDistanceMarkers(Pixel[][] src) {
+    @Override
+    void startMarkers(Pixel[][] src) {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 Pixel currPix = src[i][j];
@@ -131,8 +134,7 @@ public class TopographicWatershed extends BaseWatershed {
 
     }
 
-    @Override
-    protected Mat preprocess(Mat srcMat) {
+    public Mat preprocess(Mat srcMat) {
         Mat processImg = new Mat();
         Mat gray = new Mat();
         Mat morph = new Mat();

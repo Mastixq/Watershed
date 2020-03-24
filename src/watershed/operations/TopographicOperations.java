@@ -6,6 +6,10 @@ import java.awt.*;
 
 public class TopographicOperations extends BaseOperations {
 
+    public TopographicOperations(int width, int height) {
+        super(width, height);
+    }
+
     @Override
     public Pixel[][] toPixelArray(Mat src) {
         int width = (int) src.size().width;
@@ -25,5 +29,10 @@ public class TopographicOperations extends BaseOperations {
             }
         }
         return pixelArray;
+    }
+
+    @Override
+    public Mat preprocess(Mat srcMat) {
+        return null;
     }
 }

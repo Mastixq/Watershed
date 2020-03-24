@@ -39,11 +39,7 @@ public abstract class BaseWatershed {
         width = (int) srcImage.size().width;
         height = (int) srcImage.size().height;
 
-        processedImg = operations.preprocess(srcImage);
-
-
         pixelSet = new HashSet<>();
-        queue = new PriorityQueue<>(Pixel.distanceComparator);
 
         colorMap = new HashMap();
         colorMap.put(0, Color.white);
@@ -51,6 +47,8 @@ public abstract class BaseWatershed {
     }
 
     public abstract void calculate();
+
+    abstract void startMarkers(Pixel[][] src);
 
     //TODO dodawanie do kolejki pustych pixeli wokol ziaren
     //Priority queue by distance

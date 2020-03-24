@@ -1,27 +1,24 @@
 package watershed.algorithm;
 
-import com.sun.prism.paint.Gradient;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import watershed.operations.BaseOperations;
 import watershed.operations.GradientOperations;
 import watershed.operations.Pixel;
 
-import java.awt.*;
 import java.io.IOException;
+import java.util.PriorityQueue;
 
 public class GradientWatershed extends BaseWatershed {
 
     public GradientWatershed(String filename) throws IOException {
         super(filename);
-        operations = new GradientOperations();
+        queue = new PriorityQueue<>(Pixel.distanceComparator);
+        operations = new GradientOperations(width,height);
+        processedImg = operations.preprocess(srcImage);
         pixelArray = operations.toPixelArray(processedImg);
-        operations.save(pixelArray, width, height, "processed.png", colorMap);
-        //startGradientMarkers(pixelArray);
-       // calculate();
-       // ImageBase.save(pixelArray, pixelArray.length, pixelArray[0].length, "marked.png", colorMap);
+        startMarkers(pixelArray);
+        calculate();
+        operations.save(pixelArray,width,height,"test.png",colorMap);
+        operations.saveStateOverlay(pixelArray,width,height,"testOverlay.png",colorMap);
+        operations.saveBorderOverlay(pixelArray,width,height,"testBorderOverlay.png",colorMap);
     }
 
     @Override
@@ -58,48 +55,48 @@ public class GradientWatershed extends BaseWatershed {
 
     }
 
-
-    private void startGradientMarkers(Pixel[][] src) { //seed it
+    @Override
+    void startMarkers(Pixel[][] src) {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 Pixel currPix = src[i][j];
-                if (checkIfMaxGradient(src, i, j)) {
+                if (markLocalMinima(i, j)) {
                     currPix.state = newSeed();
                     addNeighbouringToQueue(i, j);
                 }
             }
         }
-
     }
 
-    boolean checkIfMaxGradient(Pixel[][] src, int x, int y) {
-        Pixel currPix = src[x][y];
+    private boolean markLocalMinima(int px, int py)  {
+        Pixel currPix = pixelArray[px][py];
+
         if (currPix.isChecked)
             return false;
         currPix.isChecked = true;
+
         boolean returnFlag = true;
 
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
-                int p1 = x + i;
-                int p2 = y + j;
+                int x = px + i;
+                int y = py + j;
 
-                if (p1 < 0 || p1 > width - 1 || p2 < 0 || p2 > height - 1)
+                if (x < 0 || x > width - 1 || y < 0 || y > height - 1)
                     continue;
                 if (i == 0 && j == 0) {
                     continue;
                 }
 
-                Pixel neighbouringPix = src[p1][p2];
+                Pixel neighbouringPix = pixelArray[x][y];
 
                 if (neighbouringPix.state > Pixel.BORDER)
                     return false;
-                if (neighbouringPix.value > currPix.value) {
-
+                if (neighbouringPix.value < currPix.value) {
                     returnFlag = false;
                 }
 
-                if (neighbouringPix.value < currPix.value && !neighbouringPix.isChecked) {
+                if (neighbouringPix.value > currPix.value && !neighbouringPix.isChecked) {
                     neighbouringPix.isChecked = true;
                 }
                 if (neighbouringPix.state == 1)
@@ -107,7 +104,7 @@ public class GradientWatershed extends BaseWatershed {
                 else {
                     //just in case it's false-positive max pixel, search neighbouring pixels for any other maxima
                     if (neighbouringPix.isChecked == false && neighbouringPix.value == currPix.value) {
-                        if (!checkIfMaxGradient(src, p1, p2))
+                        if (!markLocalMinima(x, y))
                             returnFlag = false;
                     }
                 }
