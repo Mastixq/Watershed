@@ -9,8 +9,6 @@ public class Pixel {
     public int state;
     public boolean isChecked;
 
-
-
     public Color color;
 
     public final static int EMPTY = 0;
@@ -31,8 +29,6 @@ public class Pixel {
         this.pos = pos;
         this.color = color;
     }
-
-
 
     public static Comparator<Pixel> distanceComparator = new Comparator<Pixel>() {
         @Override

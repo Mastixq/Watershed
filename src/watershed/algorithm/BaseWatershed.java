@@ -6,6 +6,7 @@ import watershed.operations.BaseOperations;
 import watershed.operations.Pixel;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -46,7 +47,7 @@ public abstract class BaseWatershed {
         colorMap.put(1, Color.black);
     }
 
-    public abstract void calculate();
+    public abstract void calculate() throws IOException;
 
     abstract void startMarkers(Pixel[][] src);
 

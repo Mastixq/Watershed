@@ -42,6 +42,7 @@ public class MainWindow extends Application {
         System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
         System.out.println("entering watershed:");
         new GradientWatershed("resources/small.jpg");
+//        new GrayScaleWatershed("resources/small.jpg");
         System.out.println("leaving watershed");
         System.exit(0);
 

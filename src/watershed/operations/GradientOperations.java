@@ -1,6 +1,7 @@
 package watershed.operations;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
@@ -43,14 +44,14 @@ public class GradientOperations extends BaseOperations{
         Mat clearMat = new Mat();
         Photo.fastNlMeansDenoising(gray, clearMat);
         Mat gauss = new Mat();
-        int kernelSize = 5;
+        int kernelSize = 3;
         int sigma = 0;
-        Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
+//        Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
 
-
-        Mat laplace = new Mat();
-        Imgproc.Laplacian(gauss,laplace,gauss.depth());
-
+        Imgproc.medianBlur(clearMat, gauss, 5);
+        Mat laplace = new Mat(gauss.height(),gauss.width(),CvType.CV_8UC3);
+       // Imgproc.Laplacian(gauss,laplace,gauss.depth());
+        Imgproc.Laplacian(gauss,laplace,laplace.depth());
         HighGui.imshow("Source", srcMat);
         HighGui.imshow("Grayscale", gray);
         HighGui.moveWindow("Grayscale", width, 0);
@@ -63,41 +64,28 @@ public class GradientOperations extends BaseOperations{
         HighGui.waitKey(0);
         HighGui.destroyAllWindows();
 
-        return laplace;
+        return gauss;
     }
 
-    public Mat preprocessTest(Mat srcMat) {
-        Mat processImg = new Mat();
-        Mat gray = new Mat();
-        Mat morph = new Mat();
-        Mat laplace = new Mat();
-        Mat blur = new Mat();
+    public Mat preprocessOtsu(Mat srcMat) {
+        Mat treshhold = new Mat();
+        Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
 
-        Imgproc.blur(srcMat, blur, new Size(3, 3));
-
-        Imgproc.Laplacian(blur,laplace,srcMat.depth());
-        //Imgproc.cvtColor(laplace,laplace,Imgproc.COLOR_BGR2GRAY);
-
-
-        Imgproc.cvtColor(laplace, gray, Imgproc.COLOR_BGR2GRAY);
-        //   Imgproc.threshold(gray, processImg, 0, 255, Imgproc.THRESH_OTSU);
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
-                new Size(2, 2));
-//        Imgproc.dilate(processImg, morph, kernel);
-//        Mat dst = new Mat();
-//        Imgproc.erode(morph, dst, kernel);
         Mat inverted = new Mat();
-        Core.bitwise_not(gray, inverted);
+        Core.bitwise_not(treshhold, inverted);
 
-        //Mat normalized = new Mat();
-//
-//        HighGui.imshow("src",srcOriginal);
-//        HighGui.imshow("blur",blur);
-//        HighGui.imshow("laplace", laplace);
-//        HighGui.imshow("After erode", dst);
-//        HighGui.waitKey( 0 );
-        //Core.normalize(test, inverted, 0, 1., Core.NORM_MINMAX);
-        return inverted;
+        HighGui.imshow("srcMat", srcMat);
+        HighGui.moveWindow("srcMat", width, 0);
+        HighGui.imshow("Treshhold", inverted);
+        HighGui.moveWindow("Treshhold", 0, height + 30);
+        HighGui.imshow("Inverted", inverted);
+        HighGui.moveWindow("Inverted", width, height + 30);
+        HighGui.waitKey(0);
+        HighGui.destroyAllWindows();
+
+        Mat laplace = new Mat(inverted.height(),inverted.width(),CvType.CV_8UC3);
+        Imgproc.Laplacian(inverted,laplace,laplace.depth());
+        return laplace;
     }
 
     @Override
@@ -108,8 +96,9 @@ public class GradientOperations extends BaseOperations{
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 double value = (src.get(j, i)[0]);
-                if (value < 2.)
-                    value = 0;
+                System.out.println(value);
+//                if (value < 2.)
+//                    value = 0;
                 Point tmpPoint = new Point(i, j);
                 pixelArray[i][j] = new Pixel(Pixel.EMPTY,
                         value,

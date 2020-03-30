@@ -35,4 +35,9 @@ public class TopographicOperations extends BaseOperations {
     public Mat preprocess(Mat srcMat) {
         return null;
     }
+
+    @Override
+    public Mat preprocessOtsu(Mat processedImg) {
+        return null;
+    }
 }

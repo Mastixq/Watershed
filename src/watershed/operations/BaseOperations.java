@@ -66,6 +66,26 @@ public abstract class BaseOperations {
         return newImage;
     }
 
+    public BufferedImage saveOverCustom(Pixel[][] src, Pixel[][] custom, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                Pixel currPix = src[i][j];
+                Pixel customPix = custom[i][j];
+                int rgb;
+                if (currPix.state == Pixel.BORDER)
+                    rgb = Color.GREEN.getRGB();
+                else
+                    rgb = new Color((int)customPix.value,(int)customPix.value,(int)customPix.value).getRGB();
+                newImage.setRGB(i, j, rgb);
+            }
+        }
+        File outfile = new File(filename);
+        ImageIO.write(newImage, "png", outfile);
+        return newImage;
+    }
+
+
     public BufferedImage saveBorderOverlay(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < width; i++) {
@@ -124,6 +144,22 @@ public abstract class BaseOperations {
             }
         }
     }
+    public void printPixel(Pixel[][] pixelArr, int x, int y) {
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                int p1 = x + i;
+                int p2 = y + j;
 
+                if (p1 < 0 || p1 > width - 1 || p2 < 0 || p2 > height - 1)
+                    System.out.print("# ");
+                else
+                    System.out.print((int) pixelArr[p1][p2].value + " ");
+
+            }
+            System.out.println();
+        }
+    }
     public abstract Mat preprocess(Mat srcMat);
+
+    public abstract Mat preprocessOtsu(Mat processedImg);
 }

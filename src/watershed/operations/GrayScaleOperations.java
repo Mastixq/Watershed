@@ -19,13 +19,10 @@ public class GrayScaleOperations extends BaseOperations {
         Mat clearMat = new Mat();
         Photo.fastNlMeansDenoising(gray, clearMat);
         Mat gauss = new Mat();
-        int kernelSize = 5;
+        int kernelSize = 29;
         int sigma = 0;
-        Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
-        Mat gauss2 = new Mat();
-
-        Imgproc.GaussianBlur(clearMat, gauss2, new Size(51, 31), sigma, sigma);
-
+        //Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
+        Imgproc.medianBlur(clearMat, gauss, 5);
         HighGui.imshow("Source", srcMat);
         HighGui.imshow("Grayscale", gray);
         System.out.println(width);
@@ -34,11 +31,14 @@ public class GrayScaleOperations extends BaseOperations {
         HighGui.moveWindow("Cleared", 0, height + 30);
         HighGui.imshow("Gauss", gauss);
         HighGui.moveWindow("Gauss", width, height + 30);
-        HighGui.imshow("Gauss2", gauss2);
-        HighGui.moveWindow("Gauss2", width+width, height + 30);
         HighGui.waitKey(0);
         HighGui.destroyAllWindows();
 
         return gauss;
+    }
+
+    @Override
+    public Mat preprocessOtsu(Mat processedImg) {
+        return null;
     }
 }
