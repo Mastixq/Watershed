@@ -14,6 +14,8 @@ public class GradientWatershed extends BaseWatershed {
         queue = new PriorityQueue<>(Pixel.distanceMinimaComparator);
         operations = new GradientOperations(width,height);
         processedImg = operations.preprocess(srcImage);
+        pixelArray = operations.toPixelArray(processedImg);
+        operations.save(pixelArray,width,height,"test2.png",colorMap);
         processedImg = operations.preprocessOtsu(processedImg);
         pixelArray = operations.toPixelArray(processedImg);
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
@@ -33,6 +35,13 @@ public class GradientWatershed extends BaseWatershed {
         while (!queue.isEmpty()) {
            // operations.saveStateOverlay(pixelArray,width,height,"testOverlayMarkers" + iterate++ + ".png",colorMap);
             Pixel currPix = queue.remove();
+            iterate++;
+            if(iterate%1 == 0 && iterate > 91700 && iterate < 91750) {
+                System.out.println("ITERATION: "+iterate);
+                System.out.println(currPix.pos.toString());
+                operations.saveStateOverlay(pixelArray, width, height, "testOverlay" + iterate + ".png", colorMap);
+                operations.printPixel(pixelArray, currPix.pos.x, currPix.pos.y);
+            }
             int stateCandidate = -1;
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
@@ -48,6 +57,7 @@ public class GradientWatershed extends BaseWatershed {
                     if (i == 0 && j == 0)
                         continue;
                     Pixel processingPix = pixelArray[p1][p2];
+
                     if (processingPix.state == Pixel.EMPTY || processingPix.state == Pixel.BORDER)
                         continue;
                     if (stateCandidate == -1)
@@ -74,9 +84,6 @@ public class GradientWatershed extends BaseWatershed {
                 Pixel currPix = src[i][j];
                 if (!currPix.isChecked) {
                     if (markLocalMinima(i, j)) {
-                        System.out.println("SEEDED: ");
-                        operations.printPixel(pixelArray, i, j);
-
                         currPix.state = newSeed();
                         addNeighbouringToQueue(i, j);
                     }

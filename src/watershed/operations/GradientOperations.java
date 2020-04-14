@@ -64,7 +64,7 @@ public class GradientOperations extends BaseOperations{
         HighGui.waitKey(0);
         HighGui.destroyAllWindows();
 
-        return gauss;
+        return gauss; //rozmycie
     }
 
     public Mat preprocessOtsu(Mat srcMat) {
@@ -83,9 +83,9 @@ public class GradientOperations extends BaseOperations{
         HighGui.waitKey(0);
         HighGui.destroyAllWindows();
 
-        Mat laplace = new Mat(inverted.height(),inverted.width(),CvType.CV_8UC3);
-        Imgproc.Laplacian(inverted,laplace,laplace.depth());
-        return laplace;
+        Mat laplace = new Mat(treshhold.height(),treshhold.width(),CvType.CV_8UC3);
+        Imgproc.Laplacian(treshhold,laplace,laplace.depth());
+        return laplace; //gradient
     }
 
     @Override
