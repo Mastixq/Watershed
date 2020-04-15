@@ -21,7 +21,6 @@ public class GradientWatershed extends BaseWatershed {
         operations.saveHistogram(histogram);
         processedImg = operations.preprocessOtsu(processedImg);
 
-
         pixelArray = operations.toPixelArray(processedImg);
         operations.save(pixelArray, width, height, "test3.png", colorMap);
 
@@ -33,7 +32,6 @@ public class GradientWatershed extends BaseWatershed {
         operations.saveStateOverlay(pixelArray, width, height, "testOverlay.png", colorMap);
         operations.saveBorderOverlay(pixelArray, width, height, "testBorderOverlay.png", colorMap);
         operations.saveOverCustom(pixelArray, customSrc, width, height, "testSaveOverCustom.png", colorMap);
-
     }
 
     @Override
@@ -70,10 +68,7 @@ public class GradientWatershed extends BaseWatershed {
             }
             currPix.state = stateCandidate;
             addNeighbouringToQueue(currPix.pos.x, currPix.pos.y);
-
-
         }
-
     }
 
     @Override
@@ -84,8 +79,6 @@ public class GradientWatershed extends BaseWatershed {
                 if (!currPix.isChecked) {
                     if (markLocalMinima(i, j)) {
                         currPix.state = newSeed();
-                        System.out.println("MARKED");
-                        operations.printPixel(pixelArray,i,j);
                         addNeighbouringToQueue(i, j);
                     }
                 }
@@ -151,7 +144,6 @@ public class GradientWatershed extends BaseWatershed {
                 }
             }
         }
-
     }
 
 
