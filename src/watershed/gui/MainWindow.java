@@ -43,7 +43,6 @@ public class MainWindow extends Application {
         System.out.println("entering watershed:");
 //        new GradientWatershed("resources/small.jpg");
         new TopographicWatershed("resources/small.jpg");
-//        new GrayScaleWatershed("resources/small.jpg");
         System.out.println("leaving watershed");
         System.exit(0);
 

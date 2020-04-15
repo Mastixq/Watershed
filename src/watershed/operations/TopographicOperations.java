@@ -3,6 +3,7 @@ package watershed.operations;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
@@ -41,34 +42,43 @@ public class TopographicOperations extends BaseOperations {
 
         Mat gray = new Mat();
         Imgproc.cvtColor(srcMat, gray, Imgproc.COLOR_BGR2GRAY);
-        return gray;
-//        Mat treshhold = new Mat();
-//        Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
-//        Mat inverted = new Mat();
-//        Core.bitwise_not(treshhold, inverted);
-//
-//        Mat kernel = Mat.ones(5,5, CvType.CV_32F);
-//        Mat morph = new Mat();
-//        Imgproc.morphologyEx(treshhold, morph, Imgproc.MORPH_CLOSE, kernel);
-//
-//        Mat dstTransform = new Mat();
-//        Imgproc.distanceTransform(morph, dstTransform, Imgproc.DIST_C, 3);
-//
-//
-//
-//
-//        HighGui.imshow("srcMat", srcMat);
-//        HighGui.moveWindow("srcMat", width, 0);
-//        HighGui.imshow("Treshhold", treshhold);
-//        HighGui.moveWindow("Treshhold", 0, height + 30);
-//        HighGui.imshow("Inverted", inverted);
-//        HighGui.moveWindow("Inverted", width, height + 30);
-//
-//        HighGui.waitKey(0);
-//
-//        HighGui.destroyAllWindows();
 
-//        return dstTransform; //rozmycie
+        Mat gauss = new Mat();
+        int kernelSize = 3;
+        int sigma = 0;
+        Imgproc.GaussianBlur(gray, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
+
+        Mat treshhold = new Mat();
+        Imgproc.threshold(gauss, treshhold, 0, 255, Imgproc.THRESH_OTSU);
+        Mat inverted = new Mat();
+        Core.bitwise_not(treshhold, inverted);
+
+
+
+        Mat kernel = Mat.ones(4,4, CvType.CV_32F);
+        Mat morph = new Mat();
+        Imgproc.morphologyEx(inverted, morph, Imgproc.MORPH_CLOSE, kernel);
+
+        Mat dstTransform = new Mat();
+        Imgproc.distanceTransform(morph, dstTransform, Imgproc.DIST_C, 3);
+
+
+
+
+        HighGui.imshow("srcMat", srcMat);
+        HighGui.moveWindow("srcMat", width, 0);
+        HighGui.imshow("Treshhold", treshhold);
+        HighGui.moveWindow("Treshhold", 0, height + 30);
+        HighGui.imshow("Morph", morph);
+      //  HighGui.moveWindow("Morph", 0, 0);
+        HighGui.imshow("Inverted", inverted);
+        HighGui.moveWindow("Inverted", width, height + 30);
+
+        HighGui.waitKey(0);
+
+        HighGui.destroyAllWindows();
+
+        return dstTransform; //rozmycie
     }
 
     @Override

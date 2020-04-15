@@ -43,7 +43,7 @@ public class GradientOperations extends BaseOperations {
         Mat clearMat = new Mat();
         Photo.fastNlMeansDenoising(gray, clearMat);
         Mat gauss = new Mat();
-        int kernelSize = 3;
+        int kernelSize = 21;
         int sigma = 0;
 //        Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
 
