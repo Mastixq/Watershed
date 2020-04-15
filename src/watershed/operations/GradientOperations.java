@@ -1,21 +1,20 @@
 package watershed.operations;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
-public class GradientOperations extends BaseOperations{
+public class GradientOperations extends BaseOperations {
 
     public GradientOperations(int width, int height) {
         super(width, height);
@@ -49,9 +48,9 @@ public class GradientOperations extends BaseOperations{
 //        Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
 
         Imgproc.medianBlur(clearMat, gauss, 5);
-        Mat laplace = new Mat(gauss.height(),gauss.width(),CvType.CV_8UC3);
-       // Imgproc.Laplacian(gauss,laplace,gauss.depth());
-        Imgproc.Laplacian(gauss,laplace,laplace.depth());
+        Mat laplace = new Mat(gauss.height(), gauss.width(), CvType.CV_8UC3);
+        // Imgproc.Laplacian(gauss,laplace,gauss.depth());
+        Imgproc.Laplacian(gauss, laplace, laplace.depth());
         HighGui.imshow("Source", srcMat);
         HighGui.imshow("Grayscale", gray);
         HighGui.moveWindow("Grayscale", width, 0);
@@ -60,7 +59,7 @@ public class GradientOperations extends BaseOperations{
         HighGui.imshow("Gauss", gauss);
         HighGui.moveWindow("Gauss", width, height + 30);
         HighGui.imshow("Laplace", laplace);
-        HighGui.moveWindow("Laplace", width+width, height + 30);
+        HighGui.moveWindow("Laplace", width + width, height + 30);
         HighGui.waitKey(0);
         HighGui.destroyAllWindows();
 
@@ -69,23 +68,29 @@ public class GradientOperations extends BaseOperations{
 
     public Mat preprocessOtsu(Mat srcMat) {
         Mat treshhold = new Mat();
-        Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
-
+        double q = Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
+        System.out.println("OTSU: "+ q);
         Mat inverted = new Mat();
         Core.bitwise_not(treshhold, inverted);
 
+        Mat laplace = new Mat(treshhold.height(), treshhold.width(), CvType.CV_8UC3);
+        super.applyMask(srcMat,inverted);
+        Imgproc.Laplacian(srcMat,laplace,laplace.depth());
+
+
+
         HighGui.imshow("srcMat", srcMat);
         HighGui.moveWindow("srcMat", width, 0);
-        HighGui.imshow("Treshhold", inverted);
+        HighGui.imshow("Treshhold", treshhold);
         HighGui.moveWindow("Treshhold", 0, height + 30);
         HighGui.imshow("Inverted", inverted);
         HighGui.moveWindow("Inverted", width, height + 30);
+        HighGui.imshow("Laplace", laplace);
+        HighGui.moveWindow("Laplace", width+width+30, height + 30);
         HighGui.waitKey(0);
-        HighGui.destroyAllWindows();
 
-        Mat laplace = new Mat(treshhold.height(),treshhold.width(),CvType.CV_8UC3);
-        Imgproc.Laplacian(treshhold,laplace,laplace.depth());
-        return laplace; //gradient
+        HighGui.destroyAllWindows();
+        return laplace;
     }
 
     @Override
@@ -96,18 +101,20 @@ public class GradientOperations extends BaseOperations{
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 double value = (src.get(j, i)[0]);
-                System.out.println(value);
-//                if (value < 2.)
-//                    value = 0;
+                if (value < 15.)
+                    value = 0;
                 Point tmpPoint = new Point(i, j);
                 pixelArray[i][j] = new Pixel(Pixel.EMPTY,
                         value,
                         tmpPoint,
-                        new Color((int)value, (int)value, (int)value));
+                        new Color((int) value, (int) value, (int) value));
 
             }
         }
         return pixelArray;
     }
+
+
+
 
 }

@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Map;
 
 public abstract class BaseOperations {
@@ -162,4 +163,33 @@ public abstract class BaseOperations {
     public abstract Mat preprocess(Mat srcMat);
 
     public abstract Mat preprocessOtsu(Mat processedImg);
+
+    public void applyMask(Mat src, Mat mask) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                double value = (mask.get(j, i)[0]);
+                if (value == 0.)
+                    src.put(j, i, value);
+            }
+        }
+    }
+
+    public void saveHistogram(Pixel[][] src) throws IOException {
+        int[] arr = new int[256];
+        Arrays.stream(src)
+                .flatMap(pixArr -> Arrays.stream(pixArr))
+                .map(pix -> (int)((Pixel)pix).value)
+                .forEach(value -> arr[value]++);
+
+        BufferedWriter outputWriter = null;
+        outputWriter = new BufferedWriter(new FileWriter("saved.csv"));
+        for (int i = 0; i < arr.length; i++) {
+            // Maybe:
+            outputWriter.write(arr[i]+",");
+
+        }
+        outputWriter.flush();
+        outputWriter.close();
+
+    }
 }

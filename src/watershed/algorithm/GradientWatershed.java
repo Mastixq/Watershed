@@ -1,9 +1,11 @@
 package watershed.algorithm;
 
+import org.opencv.core.Mat;
 import watershed.operations.BaseOperations;
 import watershed.operations.GradientOperations;
 import watershed.operations.Pixel;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.PriorityQueue;
 
@@ -12,41 +14,38 @@ public class GradientWatershed extends BaseWatershed {
     public GradientWatershed(String filename) throws IOException {
         super(filename);
         queue = new PriorityQueue<>(Pixel.distanceMinimaComparator);
-        operations = new GradientOperations(width,height);
+        operations = new GradientOperations(width, height);
         processedImg = operations.preprocess(srcImage);
-        pixelArray = operations.toPixelArray(processedImg);
-        operations.save(pixelArray,width,height,"test2.png",colorMap);
+        //TUTAJ HISTOGRAM ZROBIC
+        Pixel[][] histogram = operations.toPixelArray(processedImg);
+        operations.saveHistogram(histogram);
         processedImg = operations.preprocessOtsu(processedImg);
+
+
         pixelArray = operations.toPixelArray(processedImg);
+        operations.save(pixelArray, width, height, "test3.png", colorMap);
+
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
         startMarkers(pixelArray);
-        operations.saveStateOverlay(pixelArray,width,height,"testOverlayMarkers.png",colorMap);
+        operations.saveStateOverlay(pixelArray, width, height, "testOverlayMarkers.png", colorMap);
         calculate();
-        operations.save(pixelArray,width,height,"test.png",colorMap);
-        operations.saveStateOverlay(pixelArray,width,height,"testOverlay.png",colorMap);
-        operations.saveBorderOverlay(pixelArray,width,height,"testBorderOverlay.png",colorMap);
-        operations.saveOverCustom(pixelArray, customSrc, width,height,"testSaveOverCustom.png",colorMap);
+        operations.save(pixelArray, width, height, "test.png", colorMap);
+        operations.saveStateOverlay(pixelArray, width, height, "testOverlay.png", colorMap);
+        operations.saveBorderOverlay(pixelArray, width, height, "testBorderOverlay.png", colorMap);
+        operations.saveOverCustom(pixelArray, customSrc, width, height, "testSaveOverCustom.png", colorMap);
 
     }
 
     @Override
-    public void calculate() throws IOException {
-        int iterate = 0;
+    public void calculate() throws IOException { ;
         while (!queue.isEmpty()) {
-           // operations.saveStateOverlay(pixelArray,width,height,"testOverlayMarkers" + iterate++ + ".png",colorMap);
+            // operations.saveStateOverlay(pixelArray,width,height,"testOverlayMarkers" + iterate++ + ".png",colorMap);
             Pixel currPix = queue.remove();
-            iterate++;
-            if(iterate%1 == 0 && iterate > 91700 && iterate < 91750) {
-                System.out.println("ITERATION: "+iterate);
-                System.out.println(currPix.pos.toString());
-                operations.saveStateOverlay(pixelArray, width, height, "testOverlay" + iterate + ".png", colorMap);
-                operations.printPixel(pixelArray, currPix.pos.x, currPix.pos.y);
-            }
             int stateCandidate = -1;
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
 
-                    if(i==j || i == -j)
+                    if (i == j || i == -j)
                         continue;
 
                     int p1 = currPix.pos.x + i;
@@ -85,6 +84,8 @@ public class GradientWatershed extends BaseWatershed {
                 if (!currPix.isChecked) {
                     if (markLocalMinima(i, j)) {
                         currPix.state = newSeed();
+                        System.out.println("MARKED");
+                        operations.printPixel(pixelArray,i,j);
                         addNeighbouringToQueue(i, j);
                     }
                 }
@@ -92,7 +93,7 @@ public class GradientWatershed extends BaseWatershed {
         }
     }
 
-    private boolean markLocalMinima(int px, int py)  {
+    private boolean markLocalMinima(int px, int py) {
         Pixel currPix = pixelArray[px][py];
 
         if (currPix.isChecked)
@@ -105,7 +106,7 @@ public class GradientWatershed extends BaseWatershed {
             for (int j = -1; j < 2; j++) {
                 int x = px + i;
                 int y = py + j;
-                if(i==j || i == -j)
+                if (i == j || i == -j)
                     continue;
                 if (x < 0 || x > width - 1 || y < 0 || y > height - 1)
                     continue;
@@ -138,6 +139,20 @@ public class GradientWatershed extends BaseWatershed {
         return returnFlag;
     }
 
+    private void applyMask(Pixel[][] src, Pixel[][] mask) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+
+                if(mask[i][j].value == 0.0){
+                    System.out.println(src[i][j].value);
+                    src[i][j].value = 0;
+                    src[i][j].color = Color.WHITE;
+                    System.out.println(src[i][j].value);
+                }
+            }
+        }
+
+    }
 
 
 }

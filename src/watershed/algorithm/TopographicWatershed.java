@@ -1,6 +1,7 @@
 package watershed.algorithm;
 
 import org.opencv.imgproc.Imgproc;
+import watershed.operations.GradientOperations;
 import watershed.operations.Pixel;
 import watershed.operations.BaseOperations;
 
@@ -8,13 +9,16 @@ import org.opencv.core.*;
 import watershed.operations.TopographicOperations;
 
 import java.io.IOException;
+import java.util.PriorityQueue;
 
 //Image image = SwingFXUtils.toFXImage(capture, null);
 public class TopographicWatershed extends BaseWatershed {
 
     public TopographicWatershed(String filename) throws IOException {
         super(filename);
+        queue = new PriorityQueue<>(Pixel.distanceComparator);
         operations = new TopographicOperations(width,height);
+        processedImg = operations.preprocess(srcImage);
         pixelArray = operations.toPixelArray(processedImg);
         operations.save(pixelArray, width, height, "processed.png", colorMap);
         startMarkers(pixelArray);
