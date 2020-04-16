@@ -43,34 +43,29 @@ public class TopographicOperations extends BaseOperations {
         Mat gray = new Mat();
         Imgproc.cvtColor(srcMat, gray, Imgproc.COLOR_BGR2GRAY);
 
-        Mat gauss = new Mat();
-        int kernelSize = 3;
-        int sigma = 0;
-        Imgproc.GaussianBlur(gray, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
+//        Mat gauss = new Mat();
+//        int kernelSize = 3;
+//        int sigma = 0;
+//        Imgproc.GaussianBlur(gray, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
 
-        Mat treshhold = new Mat();
-        Imgproc.threshold(gauss, treshhold, 0, 255, Imgproc.THRESH_OTSU);
+        Mat otsu = new Mat();
+        Imgproc.threshold(gray, otsu, 0, 255, Imgproc.THRESH_OTSU);
         Mat inverted = new Mat();
-        Core.bitwise_not(treshhold, inverted);
+        Core.bitwise_not(otsu, inverted);
 
-
-
-        Mat kernel = Mat.ones(4,4, CvType.CV_32F);
+        Mat kernel = Mat.ones(3,3, CvType.CV_32F);
         Mat morph = new Mat();
-        Imgproc.morphologyEx(inverted, morph, Imgproc.MORPH_CLOSE, kernel);
+        Imgproc.morphologyEx(inverted, morph, Imgproc.MORPH_OPEN, kernel);
+
 
         Mat dstTransform = new Mat();
         Imgproc.distanceTransform(morph, dstTransform, Imgproc.DIST_C, 3);
 
-
-
-
         HighGui.imshow("srcMat", srcMat);
         HighGui.moveWindow("srcMat", width, 0);
-        HighGui.imshow("Treshhold", treshhold);
+        HighGui.imshow("Treshhold", otsu);
         HighGui.moveWindow("Treshhold", 0, height + 30);
         HighGui.imshow("Morph", morph);
-      //  HighGui.moveWindow("Morph", 0, 0);
         HighGui.imshow("Inverted", inverted);
         HighGui.moveWindow("Inverted", width, height + 30);
 

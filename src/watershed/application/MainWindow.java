@@ -1,52 +1,49 @@
 package watershed.application;
 
+import javafx.stage.FileChooser;
 import org.opencv.core.Core;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import watershed.algorithm.*;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MainWindow extends Application {
-    public MainWindow() {
-    }
+
     @Override
     public void init() {
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        final Button button = new Button();
-        button.setText("Hello Watershed");
-        button.setOnAction((ActionEvent event) -> {
-            System.out.println("Hello Watershed!");
-        });
-        final StackPane root = new StackPane();
-        root.getChildren().add(button);
-        final Scene scene = new Scene(root, 300, 250);
-        primaryStage.setTitle("Hello Watershed!");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+    public void start(Stage primaryStage) throws IOException {
+        primaryStage.setTitle("Watershed application");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File("resources"));
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
+        String name = selectedFile.getName();
+
+        int choice = 0;
+        switch (choice) {
+            case 0:
+                new GradientWatershed("resources/"+name);
+                break;
+            case 1:
+                new TopographicWatershed("resources/"+name);
+                break;
+        }
     }
     @Override
     public void stop() {
     }
     public static void main(String[] args) throws IOException {
-        //launch(arguments);
+//        launch(args);
         System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
-        System.out.println("entering watershed:");
-//        new GradientWatershed("resources/small.jpg");
-        new TopographicWatershed("resources/small.jpg");
-        System.out.println("leaving watershed");
+//        new GradientWatershed("resources/"+"small.jpg");
+        new TopographicWatershed("resources/"+"small.jpg");
         System.exit(0);
-
-
     }
 
 }
