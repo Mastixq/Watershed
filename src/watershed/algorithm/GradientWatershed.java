@@ -1,11 +1,8 @@
 package watershed.algorithm;
 
-import org.opencv.core.Mat;
-import watershed.operations.BaseOperations;
 import watershed.operations.GradientOperations;
 import watershed.operations.Pixel;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.PriorityQueue;
 
@@ -77,7 +74,7 @@ public class GradientWatershed extends BaseWatershed {
             for (int j = 0; j < height; j++) {
                 Pixel currPix = src[i][j];
                 if (!currPix.isChecked) {
-                    if (markLocalMinima(i, j)) {
+                    if (isLocalMinimum(i, j)) {
                         currPix.state = newSeed();
                         addNeighbouringToQueue(i, j);
                     }
@@ -86,7 +83,7 @@ public class GradientWatershed extends BaseWatershed {
         }
     }
 
-    private boolean markLocalMinima(int px, int py) {
+    private boolean isLocalMinimum(int px, int py) {
         Pixel currPix = pixelArray[px][py];
 
         if (currPix.isChecked)
@@ -123,7 +120,7 @@ public class GradientWatershed extends BaseWatershed {
                 else {
                     //just in case it's false-positive max pixel, search neighbouring pixels for any other maxima
                     if (neighbouringPix.isChecked == false && neighbouringPix.value == currPix.value) {
-                        if (!markLocalMinima(x, y))
+                        if (!isLocalMinimum(x, y))
                             returnFlag = false;
                     }
                 }
@@ -131,20 +128,4 @@ public class GradientWatershed extends BaseWatershed {
         }
         return returnFlag;
     }
-
-    private void applyMask(Pixel[][] src, Pixel[][] mask) {
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-
-                if(mask[i][j].value == 0.0){
-                    System.out.println(src[i][j].value);
-                    src[i][j].value = 0;
-                    src[i][j].color = Color.WHITE;
-                    System.out.println(src[i][j].value);
-                }
-            }
-        }
-    }
-
-
 }

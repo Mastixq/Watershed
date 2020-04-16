@@ -7,10 +7,7 @@ import watershed.operations.Pixel;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Random;
+import java.util.*;
 
 public abstract class BaseWatershed {
     Mat processedImg;
@@ -19,8 +16,7 @@ public abstract class BaseWatershed {
 
     int width, height;
 
-    public HashMap<Integer, Color> colorMap;
-    public int nextSeed = 2;
+    HashMap<Integer, Color> colorMap;
 
     HashSet<Pixel> pixelSet;
     PriorityQueue<Pixel> queue;
@@ -47,13 +43,13 @@ public abstract class BaseWatershed {
         colorMap.put(1, Color.black);
     }
 
+    public int nextSeed = 2;
+
     public abstract void calculate() throws IOException;
 
     abstract void startMarkers(Pixel[][] src);
 
-    //TODO dodawanie do kolejki pustych pixeli wokol ziaren
-    //Priority queue by distance
-    protected void addNeighbouringToQueue(int x, int y) {
+    void addNeighbouringToQueue(int x, int y) {
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
                 if(i==j || i == -j)
@@ -75,14 +71,8 @@ public abstract class BaseWatershed {
                         continue;
                     }
                 }
-
             }
         }
-    }
-
-    protected int newSeed(Color color) {
-        colorMap.put(nextSeed, color);
-        return nextSeed++;
     }
 
     protected int newSeed() {

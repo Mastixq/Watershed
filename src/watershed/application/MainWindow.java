@@ -1,4 +1,4 @@
-package watershed.gui;
+package watershed.application;
 
 import org.opencv.core.Core;
 

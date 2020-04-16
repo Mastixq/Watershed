@@ -14,7 +14,6 @@ public class Pixel {
     public final static int EMPTY = 0;
     public final static int BORDER = 1;
 
-
     public Pixel(int state, double value, Point pos){
         this.isChecked = false;
         this.state = state;

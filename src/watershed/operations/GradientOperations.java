@@ -34,7 +34,6 @@ public class GradientOperations extends BaseOperations {
         return newImage;
     }
 
-
     @Override
     public Mat preprocess(Mat srcMat) {
 
@@ -77,8 +76,6 @@ public class GradientOperations extends BaseOperations {
         super.applyMask(srcMat,inverted);
         Imgproc.Laplacian(srcMat,laplace,laplace.depth());
 
-
-
         HighGui.imshow("srcMat", srcMat);
         HighGui.moveWindow("srcMat", width, 0);
         HighGui.imshow("Treshhold", treshhold);
@@ -113,8 +110,4 @@ public class GradientOperations extends BaseOperations {
         }
         return pixelArray;
     }
-
-
-
-
 }
