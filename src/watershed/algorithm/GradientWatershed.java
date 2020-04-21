@@ -7,34 +7,40 @@ import java.io.IOException;
 import java.util.PriorityQueue;
 
 public class GradientWatershed extends BaseWatershed {
-
+    GradientOperations operations;
     public GradientWatershed(String filename) throws IOException {
         super(filename);
         queue = new PriorityQueue<>(Pixel.distanceMinimaComparator);
         operations = new GradientOperations(width, height);
+
+    }
+
+    public void updateParameters(int filterWidth, int filterHeight, int ignoreGradientValue){
+        operations.updateParameters(filterWidth, filterHeight, ignoreGradientValue);
+    }
+
+    public void run() throws IOException {
         processedImg = operations.preprocess(srcImage);
-        //TUTAJ HISTOGRAM ZROBIC
         Pixel[][] histogram = operations.toPixelArray(processedImg);
         operations.saveHistogram(histogram);
-        processedImg = operations.preprocessOtsu(processedImg);
+
+        processedImg = operations.applyOtsuMask(processedImg);
 
         pixelArray = operations.toPixelArray(processedImg);
-        operations.save(pixelArray, width, height, "test3.png", colorMap);
 
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
         startMarkers(pixelArray);
-        operations.saveStateOverlay(pixelArray, width, height, "testOverlayMarkers.png", colorMap);
         calculate();
-        operations.save(pixelArray, width, height, "test.png", colorMap);
-        operations.saveStateOverlay(pixelArray, width, height, "testOverlay.png", colorMap);
-        operations.saveBorderOverlay(pixelArray, width, height, "testBorderOverlay.png", colorMap);
-        operations.saveOverCustom(pixelArray, customSrc, width, height, "testSaveOverCustom.png", colorMap);
+
+        operations.save(pixelArray, width, height, "processed.png", colorMap);
+        operations.saveStateOverlay(pixelArray, width, height, "watershedColored.png", colorMap);
+        operations.saveBorderOverlay(pixelArray, width, height, "watershed.png", colorMap);
+        operations.saveOverCustom(pixelArray, customSrc, width, height, "watershedSrcOverlay.png", colorMap);
     }
 
     @Override
-    public void calculate() throws IOException { ;
+    public void calculate() {
         while (!queue.isEmpty()) {
-            // operations.saveStateOverlay(pixelArray,width,height,"testOverlayMarkers" + iterate++ + ".png",colorMap);
             Pixel currPix = queue.remove();
             int stateCandidate = -1;
             for (int i = -1; i < 2; i++) {
@@ -128,4 +134,6 @@ public class GradientWatershed extends BaseWatershed {
         }
         return returnFlag;
     }
+
+
 }

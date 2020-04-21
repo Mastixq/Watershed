@@ -1,5 +1,6 @@
 package watershed.operations;
 
+import javafx.geometry.Rectangle2D;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -29,8 +30,8 @@ public abstract class BaseOperations {
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Arrays.stream(src)
                 .flatMap(pixels -> Arrays.stream(pixels)).forEach(pixel -> {
-                int rgb = colorMap.get((pixel.state)).getRGB();
-                newImage.setRGB(pixel.pos.x, pixel.pos.y, rgb);
+            int rgb = colorMap.get((pixel.state)).getRGB();
+            newImage.setRGB(pixel.pos.x, pixel.pos.y, rgb);
         });
 
         File outfile = new File(filename);
@@ -40,17 +41,15 @@ public abstract class BaseOperations {
 
     public BufferedImage saveStateOverlay(Pixel[][] src, int width, int height, String filename, Map<Integer, Color> colorMap) throws IOException {
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                Pixel currPix = src[i][j];
-                int rgb;
-                if (currPix.state > 0)
-                    rgb = colorMap.get((src[i][j].state)).getRGB();
-                else
-                    rgb = new Color((int) currPix.value, (int) currPix.value, (int) currPix.value).getRGB();
-                newImage.setRGB(i, j, rgb);
-            }
-        }
+        Arrays.stream(src)
+                .flatMap(pixels -> Arrays.stream(pixels)).forEach(pixel -> {
+            int rgb;
+            if (pixel.state > 0)
+                rgb = colorMap.get((pixel.state)).getRGB();
+            else
+                rgb = new Color((int) pixel.value, (int) pixel.value, (int) pixel.value).getRGB();
+            newImage.setRGB(pixel.pos.x, pixel.pos.y, rgb);
+        });
         File outfile = new File(filename);
         ImageIO.write(newImage, "png", outfile);
         return newImage;
@@ -64,7 +63,7 @@ public abstract class BaseOperations {
                 Pixel customPix = custom[i][j];
                 int rgb;
                 if (currPix.state == Pixel.BORDER)
-                    rgb = Color.GREEN.getRGB();
+                    rgb = Color.BLACK.getRGB();
                 else
                     rgb = new Color((int) customPix.value, (int) customPix.value, (int) customPix.value).getRGB();
                 newImage.setRGB(i, j, rgb);
@@ -127,8 +126,6 @@ public abstract class BaseOperations {
 
     public abstract Mat preprocess(Mat srcMat);
 
-    public Mat preprocessOtsu(Mat processedImg){return null;}
-
     public void applyMask(Mat src, Mat mask) {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -156,4 +153,5 @@ public abstract class BaseOperations {
         outputWriter.close();
 
     }
+
 }

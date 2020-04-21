@@ -3,17 +3,20 @@ package watershed.operations;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.photo.Photo;
+
 
 import java.awt.*;
 
-public class TopographicOperations extends BaseOperations {
+public class DistanceOperations extends BaseOperations {
 
-    public TopographicOperations(int width, int height) {
+    private int elementWidth, elementHeight;
+
+    public DistanceOperations(int width, int height) {
         super(width, height);
+        this.elementWidth = 3;
+        this.elementHeight = 3;
     }
 
     @Override
@@ -39,46 +42,32 @@ public class TopographicOperations extends BaseOperations {
 
     @Override
     public Mat preprocess(Mat srcMat) {
-
         Mat gray = new Mat();
         Imgproc.cvtColor(srcMat, gray, Imgproc.COLOR_BGR2GRAY);
 
-//        Mat gauss = new Mat();
-//        int kernelSize = 3;
-//        int sigma = 0;
-//        Imgproc.GaussianBlur(gray, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
-
         Mat otsu = new Mat();
         Imgproc.threshold(gray, otsu, 0, 255, Imgproc.THRESH_OTSU);
+
+        Mat kernel = Mat.ones(elementWidth,elementHeight, CvType.CV_32F);
+
+        Mat morphOpen = new Mat();
+        Imgproc.morphologyEx(otsu, morphOpen, Imgproc.MORPH_OPEN, kernel);
+
+        Mat morphClose = new Mat();
+        Imgproc.morphologyEx(morphOpen, morphClose, Imgproc.MORPH_CLOSE, kernel);
+
         Mat inverted = new Mat();
-        Core.bitwise_not(otsu, inverted);
-
-        Mat kernel = Mat.ones(3,3, CvType.CV_32F);
-        Mat morph = new Mat();
-        Imgproc.morphologyEx(inverted, morph, Imgproc.MORPH_OPEN, kernel);
-
+        Core.bitwise_not(morphClose, inverted);
 
         Mat dstTransform = new Mat();
-        Imgproc.distanceTransform(morph, dstTransform, Imgproc.DIST_C, 3);
+        Imgproc.distanceTransform(inverted, dstTransform, Imgproc.DIST_C, 3);
 
-        HighGui.imshow("srcMat", srcMat);
-        HighGui.moveWindow("srcMat", width, 0);
-        HighGui.imshow("Treshhold", otsu);
-        HighGui.moveWindow("Treshhold", 0, height + 30);
-        HighGui.imshow("Morph", morph);
-        HighGui.imshow("Inverted", inverted);
-        HighGui.moveWindow("Inverted", width, height + 30);
-
-        HighGui.waitKey(0);
-
-        HighGui.destroyAllWindows();
-
-        return dstTransform; //rozmycie
+        return dstTransform;
     }
 
-    @Override
-    public Mat preprocessOtsu(Mat processedImg) {
-        return null;
+    public void updateParameters(int elementWidth, int elementHeight) {
+        this.elementWidth = elementWidth;
+        this.elementHeight = elementHeight;
     }
 
 }

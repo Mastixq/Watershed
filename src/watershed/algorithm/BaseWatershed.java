@@ -17,15 +17,10 @@ public abstract class BaseWatershed {
     int width, height;
 
     HashMap<Integer, Color> colorMap;
+    public int nextSeed = 2;
 
     HashSet<Pixel> pixelSet;
     PriorityQueue<Pixel> queue;
-
-    BaseOperations operations;
-
-    private BaseWatershed() {
-        System.out.println("0 arguments constructor can't be called");
-    }
 
     public BaseWatershed(String filename) {
         srcImage = Imgcodecs.imread(filename);
@@ -43,9 +38,9 @@ public abstract class BaseWatershed {
         colorMap.put(1, Color.black);
     }
 
-    public int nextSeed = 2;
 
-    public abstract void calculate() throws IOException;
+
+    public  void calculate(){};
 
     abstract void startMarkers(Pixel[][] src);
 

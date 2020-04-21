@@ -16,8 +16,14 @@ import java.util.Map;
 
 public class GradientOperations extends BaseOperations {
 
+    private int filterWidth, filterHeight;
+    private int ignoreGradientValue;
+
     public GradientOperations(int width, int height) {
         super(width, height);
+        this.filterHeight = 6;
+        this.filterWidth = 6;
+        this.ignoreGradientValue = 15;
     }
 
     @Override
@@ -36,57 +42,27 @@ public class GradientOperations extends BaseOperations {
 
     @Override
     public Mat preprocess(Mat srcMat) {
-
         Mat gray = new Mat();
         Imgproc.cvtColor(srcMat, gray, Imgproc.COLOR_BGR2GRAY);
+        Mat blur = new Mat();
+
+        Imgproc.blur(gray, blur, new Size(filterWidth, filterHeight));
         Mat clearMat = new Mat();
-        Photo.fastNlMeansDenoising(gray, clearMat);
-        Mat gauss = new Mat();
-        int kernelSize = 21;
-        int sigma = 0;
-//        Imgproc.GaussianBlur(clearMat, gauss, new Size(kernelSize, kernelSize), sigma, sigma);
+        Photo.fastNlMeansDenoising(blur, clearMat);
 
-        Imgproc.medianBlur(clearMat, gauss, 5);
-        Mat laplace = new Mat(gauss.height(), gauss.width(), CvType.CV_8UC3);
-        // Imgproc.Laplacian(gauss,laplace,gauss.depth());
-        Imgproc.Laplacian(gauss, laplace, laplace.depth());
-        HighGui.imshow("Source", srcMat);
-        HighGui.imshow("Grayscale", gray);
-        HighGui.moveWindow("Grayscale", width, 0);
-        HighGui.imshow("Cleared", clearMat);
-        HighGui.moveWindow("Cleared", 0, height + 30);
-        HighGui.imshow("Gauss", gauss);
-        HighGui.moveWindow("Gauss", width, height + 30);
-        HighGui.imshow("Laplace", laplace);
-        HighGui.moveWindow("Laplace", width + width, height + 30);
-        HighGui.waitKey(0);
-        HighGui.destroyAllWindows();
-
-        return gauss; //rozmycie
+        return clearMat;
     }
 
-    public Mat preprocessOtsu(Mat srcMat) {
+    public Mat applyOtsuMask(Mat srcMat) {
         Mat treshhold = new Mat();
-        double q = Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
-        System.out.println("OTSU: "+ q);
+        Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
         Mat inverted = new Mat();
         Core.bitwise_not(treshhold, inverted);
 
         Mat laplace = new Mat(treshhold.height(), treshhold.width(), CvType.CV_8UC3);
-        super.applyMask(srcMat,inverted);
-        Imgproc.Laplacian(srcMat,laplace,laplace.depth());
+        super.applyMask(srcMat, inverted);
+        Imgproc.Laplacian(srcMat, laplace, laplace.depth());
 
-        HighGui.imshow("srcMat", srcMat);
-        HighGui.moveWindow("srcMat", width, 0);
-        HighGui.imshow("Treshhold", treshhold);
-        HighGui.moveWindow("Treshhold", 0, height + 30);
-        HighGui.imshow("Inverted", inverted);
-        HighGui.moveWindow("Inverted", width, height + 30);
-        HighGui.imshow("Laplace", laplace);
-        HighGui.moveWindow("Laplace", width+width+30, height + 30);
-        HighGui.waitKey(0);
-
-        HighGui.destroyAllWindows();
         return laplace;
     }
 
@@ -97,17 +73,21 @@ public class GradientOperations extends BaseOperations {
         Pixel[][] pixelArray = new Pixel[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                double value = (src.get(j, i)[0]);
-                if (value < 15.)
+                int value = (int) (src.get(j, i)[0]);
+                if (value < ignoreGradientValue)
                     value = 0;
-                Point tmpPoint = new Point(i, j);
                 pixelArray[i][j] = new Pixel(Pixel.EMPTY,
                         value,
-                        tmpPoint,
-                        new Color((int) value, (int) value, (int) value));
-
+                        new Point(i, j),
+                        new Color(value, value, value));
             }
         }
         return pixelArray;
+    }
+
+    public void updateParameters(int filterWidth, int filterHeight, int ignoreGradientValue) {
+        this.filterWidth = filterWidth;
+        this.filterHeight = filterHeight;
+        this.ignoreGradientValue = ignoreGradientValue;
     }
 }

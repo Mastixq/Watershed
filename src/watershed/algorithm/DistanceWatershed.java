@@ -1,27 +1,34 @@
 package watershed.algorithm;
 
-import watershed.operations.TopographicOperations;
+import watershed.operations.DistanceOperations;
 import watershed.operations.Pixel;
 
 import java.io.IOException;
 import java.util.PriorityQueue;
 
 
-public class TopographicWatershed extends BaseWatershed {
+public class DistanceWatershed extends BaseWatershed {
+    DistanceOperations operations;
 
-    public TopographicWatershed(String filename) throws IOException {
+    public DistanceWatershed(String filename) {
         super(filename);
         queue = new PriorityQueue<>(Pixel.distanceComparator);
-        operations = new TopographicOperations(width,height);
+        operations = new DistanceOperations(width, height);
+    }
+
+    public void run() throws IOException {
         processedImg = operations.preprocess(srcImage);
         pixelArray = operations.toPixelArray(processedImg);
         operations.save(pixelArray, width, height, "processed.png", colorMap);
         startMarkers(pixelArray);
         calculate();
-        operations.save(pixelArray, pixelArray.length, pixelArray[0].length, "marked.png", colorMap);
+        operations.save(pixelArray, width, height, "watershed.png", colorMap);
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
         operations.saveOverCustom(pixelArray, customSrc, width, height, "testSaveOverCustom.png", colorMap);
+    }
 
+    public void updateParameters(int elementWidth, int elementHeight){
+        operations.updateParameters(elementWidth,elementHeight);
     }
 
     /**
@@ -44,15 +51,6 @@ public class TopographicWatershed extends BaseWatershed {
 
     }
 
-    /**
-     * IMPORTANT isChecked flag be must set to false before entering this function
-     * because it's just a helper recurrence function
-     *
-     * @param src
-     * @param p1
-     * @param p2
-     * @return checked if given pixel is local maxima of topographic distance
-     */
     boolean isLocalMaximum(Pixel[][] src, int p1, int p2) {
         Pixel currPix = src[p1][p2];
         if (currPix.isChecked)
@@ -100,7 +98,7 @@ public class TopographicWatershed extends BaseWatershed {
     }
 
     @Override
-     public void calculate() {
+    public void calculate() {
         while (!queue.isEmpty()) {
             Pixel currPix = queue.remove();
             int stateCandidate = -1;
@@ -129,6 +127,5 @@ public class TopographicWatershed extends BaseWatershed {
         }
     }
 
-    //TODO remove end of the lines (only 1 in moore)
 }
 
