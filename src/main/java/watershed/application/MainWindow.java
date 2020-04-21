@@ -8,7 +8,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import org.opencv.core.Core;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -27,7 +26,7 @@ public class MainWindow extends Application {
 
     @Override
     public void init() {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        nu.pattern.OpenCV.loadShared();
     }
 
     @Override
@@ -80,6 +79,7 @@ public class MainWindow extends Application {
     }
 
     public static void main(String[] args) {
+//        System.out.println(System.getProperty("java.library.path"));
         launch(args);
         System.exit(0);
     }
@@ -101,7 +101,7 @@ public class MainWindow extends Application {
 
         fileButton.setOnAction(value -> {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setInitialDirectory(new File("resources"));
+            //fileChooser.setInitialDirectory(new File("resources"));
             File selectedFile = fileChooser.showOpenDialog(primaryStage);
             String name = selectedFile.getName();
             currentFile = selectedFile.getAbsolutePath();

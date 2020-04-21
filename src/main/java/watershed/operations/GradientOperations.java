@@ -1,7 +1,6 @@
 package watershed.operations;
 
 import org.opencv.core.*;
-import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 
@@ -11,7 +10,6 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 
 public class GradientOperations extends BaseOperations {

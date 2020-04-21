@@ -2,11 +2,9 @@ package watershed.algorithm;
 
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
-import watershed.operations.BaseOperations;
 import watershed.operations.Pixel;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.*;
 
 public abstract class BaseWatershed {

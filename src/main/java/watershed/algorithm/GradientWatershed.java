@@ -28,6 +28,7 @@ public class GradientWatershed extends BaseWatershed {
 
         pixelArray = operations.toPixelArray(processedImg);
 
+
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
         startMarkers(pixelArray);
         calculate();

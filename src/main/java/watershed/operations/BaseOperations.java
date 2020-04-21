@@ -1,9 +1,6 @@
 package watershed.operations;
 
-import javafx.geometry.Rectangle2D;
 import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

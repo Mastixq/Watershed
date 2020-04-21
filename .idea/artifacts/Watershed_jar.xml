@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Watershed:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Watershed_jar</output-path>
+    <root id="archive" name="Watershed.jar">
+      <element id="module-output" name="Watershed" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/Studies/openCV/opencv/build/java/opencv-412.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

@@ -3,7 +3,6 @@ package watershed.operations;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 
 
@@ -60,7 +59,7 @@ public class DistanceOperations extends BaseOperations {
         Core.bitwise_not(morphClose, inverted);
 
         Mat dstTransform = new Mat();
-        Imgproc.distanceTransform(inverted, dstTransform, Imgproc.DIST_C, 3);
+        Imgproc.distanceTransform(inverted, dstTransform, Imgproc.CV_DIST_C, 3);
 
         return dstTransform;
     }
