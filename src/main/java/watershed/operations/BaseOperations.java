@@ -1,18 +1,28 @@
 package watershed.operations;
 
 import org.opencv.core.*;
+import watershed.application.MainWindow;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class BaseOperations {
 
     int width, height;
+    boolean invertSelection = false;
 
     public BaseOperations(int width, int height) {
         this.width = width;
@@ -133,6 +143,10 @@ public abstract class BaseOperations {
         }
     }
 
+
+    /**
+     * Utility function to save histogram from given pixel array
+     */
     public void saveHistogram(Pixel[][] src) throws IOException {
         int[] arr = new int[256];
         Arrays.stream(src)
@@ -149,6 +163,66 @@ public abstract class BaseOperations {
         outputWriter.flush();
         outputWriter.close();
 
+    }
+
+    public String prepareResultsFile() throws URISyntaxException {
+        URI uri = MainWindow.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        String path = Paths.get(uri).getParent().toString();
+        DateFormat dateFormat = new SimpleDateFormat("MMddHHmmss");
+        Date date = new Date();
+        File newDirectory = new File(path + "/results" + dateFormat.format(date));
+        System.out.println(newDirectory.toString());
+        if (!newDirectory.exists()) {
+            newDirectory.mkdir();
+        }
+        return newDirectory.toString();
+    }
+
+    public void setInvertSelection(boolean selection) {
+        System.out.println(selection);
+        invertSelection = selection;
+    }
+
+    public void saveStats(Pixel[][] src, String filename) throws IOException {
+        BufferedWriter outputWriter;
+        outputWriter = new BufferedWriter(new FileWriter(filename + ".csv"));
+
+        Map<Integer, Integer> sizeStats = getSeedSize(src);
+
+        outputWriter.write("Total" + "," + width * height + '\n');
+        int totalFound = sizeStats.values().stream().reduce(0, (subtotal, value) -> subtotal + value);
+        outputWriter.write("Found" + "," + totalFound + '\n');
+
+        int size = sizeStats.size();
+        DecimalFormat df2 = new DecimalFormat("#.##");
+        outputWriter.write("Seeds:" + "," + size + '\n');
+        outputWriter.write("Avg size:" + "," + df2.format((double) totalFound / size) + "\n\n");
+
+        for (Integer key : sizeStats.keySet()) {
+            outputWriter.write(key + "," + sizeStats.get(key) + '\n');
+        }
+        outputWriter.flush();
+        outputWriter.close();
+
+    }
+
+    public Map<Integer, Integer> getSeedSize(Pixel[][] src) {
+        HashMap<Integer, Integer> seedMap = new HashMap<>();
+        Arrays.stream(src)
+                .flatMap(pixArr -> Arrays.stream(pixArr))
+                .filter(pixel -> pixel.state != Pixel.EMPTY)
+                .filter(pixel -> pixel.state != Pixel.BORDER)
+                .forEach(pixel -> {
+                    if (seedMap.get(pixel.state) == null) {
+                        seedMap.put(pixel.state, 1);
+                    } else {
+                        int prevValue = seedMap.get(pixel.state);
+                        seedMap.put(pixel.state, ++prevValue);
+                    }
+                });
+
+
+        return seedMap;
     }
 
 }

@@ -5,7 +5,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-
 import java.awt.*;
 
 public class DistanceOperations extends BaseOperations {
@@ -55,11 +54,17 @@ public class DistanceOperations extends BaseOperations {
         Mat morphClose = new Mat();
         Imgproc.morphologyEx(morphOpen, morphClose, Imgproc.MORPH_CLOSE, kernel);
 
-        Mat inverted = new Mat();
-        Core.bitwise_not(morphClose, inverted);
+
+        Mat toTransform = new Mat();
+        if(!invertSelection) {
+            Core.bitwise_not(morphClose, toTransform);
+        }
+        else {
+            toTransform = morphOpen;
+        }
 
         Mat dstTransform = new Mat();
-        Imgproc.distanceTransform(inverted, dstTransform, Imgproc.CV_DIST_C, 3);
+        Imgproc.distanceTransform(toTransform, dstTransform, Imgproc.CV_DIST_C, 3);
 
         return dstTransform;
     }

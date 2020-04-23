@@ -4,8 +4,8 @@ import watershed.operations.DistanceOperations;
 import watershed.operations.Pixel;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.PriorityQueue;
-
 
 public class DistanceWatershed extends BaseWatershed {
     DistanceOperations operations;
@@ -16,21 +16,26 @@ public class DistanceWatershed extends BaseWatershed {
         operations = new DistanceOperations(width, height);
     }
 
-    public void run() throws IOException {
+    public void run() throws IOException, URISyntaxException {
+        String resultsDirectory = operations.prepareResultsFile();
         processedImg = operations.preprocess(srcImage);
         pixelArray = operations.toPixelArray(processedImg);
-        operations.save(pixelArray, width, height, "processed.png", colorMap);
+        operations.save(pixelArray, width, height, resultsDirectory + "/processed.png", colorMap);
         startMarkers(pixelArray);
         calculate();
-        operations.save(pixelArray, width, height, "watershed.png", colorMap);
+        operations.save(pixelArray, width, height, resultsDirectory + "/watershed.png", colorMap);
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
-        operations.saveOverCustom(pixelArray, customSrc, width, height, "testSaveOverCustom.png", colorMap);
+        operations.saveOverCustom(pixelArray, customSrc, width, height, resultsDirectory + "/watershedSrcOverlay.png", colorMap);
+        operations.saveStats(pixelArray, resultsDirectory + "/data");
     }
 
     public void updateParameters(int elementWidth, int elementHeight){
         operations.updateParameters(elementWidth,elementHeight);
     }
 
+    public void setInvertSelection(boolean selection) {
+        operations.setInvertSelection(selection);
+    }
     /**
      * Function responsible for creating one point markers
      * for each local maximum in topographic distance
@@ -48,7 +53,6 @@ public class DistanceWatershed extends BaseWatershed {
                 }
             }
         }
-
     }
 
     boolean isLocalMaximum(Pixel[][] src, int p1, int p2) {

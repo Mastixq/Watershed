@@ -16,6 +16,7 @@ public class GradientOperations extends BaseOperations {
 
     private int filterWidth, filterHeight;
     private int ignoreGradientValue;
+    public Mat otsuMask = null;
 
     public GradientOperations(int width, int height) {
         super(width, height);
@@ -48,17 +49,24 @@ public class GradientOperations extends BaseOperations {
         Mat clearMat = new Mat();
         Photo.fastNlMeansDenoising(blur, clearMat);
 
-        return clearMat;
+        return blur;
     }
 
     public Mat applyOtsuMask(Mat srcMat) {
         Mat treshhold = new Mat();
         Imgproc.threshold(srcMat, treshhold, 0, 255, Imgproc.THRESH_OTSU);
-        Mat inverted = new Mat();
-        Core.bitwise_not(treshhold, inverted);
+        Mat toTransform = new Mat();
+        if(!invertSelection) {
+            Core.bitwise_not(treshhold, toTransform);
+        }
+        else {
+            toTransform = treshhold;
+        }
 
-        Mat laplace = new Mat(treshhold.height(), treshhold.width(), CvType.CV_8UC3);
-        super.applyMask(srcMat, inverted);
+        otsuMask = toTransform;
+
+        Mat laplace = new Mat(toTransform.height(), toTransform.width(), CvType.CV_8UC3);
+        super.applyMask(srcMat, toTransform);
         Imgproc.Laplacian(srcMat, laplace, laplace.depth());
 
         return laplace;

@@ -4,39 +4,50 @@ import watershed.operations.GradientOperations;
 import watershed.operations.Pixel;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.PriorityQueue;
 
 public class GradientWatershed extends BaseWatershed {
     GradientOperations operations;
+
     public GradientWatershed(String filename) throws IOException {
         super(filename);
         queue = new PriorityQueue<>(Pixel.distanceMinimaComparator);
         operations = new GradientOperations(width, height);
-
     }
 
-    public void updateParameters(int filterWidth, int filterHeight, int ignoreGradientValue){
+    public void updateParameters(int filterWidth, int filterHeight, int ignoreGradientValue) {
         operations.updateParameters(filterWidth, filterHeight, ignoreGradientValue);
     }
 
-    public void run() throws IOException {
+    public void setInvertSelection(boolean selection) {
+        operations.setInvertSelection(selection);
+    }
+
+    public void run() throws IOException, URISyntaxException {
+        String resultsDirectory = operations.prepareResultsFile();
         processedImg = operations.preprocess(srcImage);
         Pixel[][] histogram = operations.toPixelArray(processedImg);
-        operations.saveHistogram(histogram);
+
+//        operations.saveHistogram(histogram);
 
         processedImg = operations.applyOtsuMask(processedImg);
 
         pixelArray = operations.toPixelArray(processedImg);
+        Pixel[][] otsuHelper = operations.toPixelArray(operations.otsuMask);
 
-
+        applyMask(pixelArray, otsuHelper);
+        operations.save(pixelArray, width, height, resultsDirectory + "/gradient.png", colorMap);
         Pixel[][] customSrc = operations.toPixelArray(srcImage);
         startMarkers(pixelArray);
         calculate();
 
-        operations.save(pixelArray, width, height, "processed.png", colorMap);
-        operations.saveStateOverlay(pixelArray, width, height, "watershedColored.png", colorMap);
-        operations.saveBorderOverlay(pixelArray, width, height, "watershed.png", colorMap);
-        operations.saveOverCustom(pixelArray, customSrc, width, height, "watershedSrcOverlay.png", colorMap);
+        operations.save(pixelArray, width, height, resultsDirectory + "/processed.png", colorMap);
+        operations.saveStateOverlay(pixelArray, width, height, resultsDirectory + "/watershedColored.png", colorMap);
+        operations.saveBorderOverlay(pixelArray, width, height, resultsDirectory + "/watershed.png", colorMap);
+        operations.saveOverCustom(pixelArray, customSrc, width, height, resultsDirectory + "/watershedSrcOverlay.png", colorMap);
+        operations.saveStats(pixelArray, resultsDirectory + "/data");
     }
 
     @Override
@@ -135,6 +146,17 @@ public class GradientWatershed extends BaseWatershed {
         }
         return returnFlag;
     }
+
+    private void applyMask(Pixel[][] src, Pixel[][] mask) {
+        Arrays.stream(mask)
+                .flatMap(pixArr -> Arrays.stream(pixArr))
+                .filter(pix ->  pix.value == 0)
+                .forEach(pixel -> {
+                    src[pixel.pos.x][pixel.pos.y].state = Pixel.BORDER;
+                    src[pixel.pos.x][pixel.pos.y].isChecked = true;
+                });
+    }
+
 
 
 }

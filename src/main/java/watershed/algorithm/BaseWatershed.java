@@ -5,6 +5,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import watershed.operations.Pixel;
 
 import java.awt.*;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public abstract class BaseWatershed {
@@ -36,9 +38,9 @@ public abstract class BaseWatershed {
         colorMap.put(1, Color.black);
     }
 
+    public abstract void run() throws IOException, URISyntaxException;
 
-
-    public  void calculate(){};
+    public abstract void calculate();
 
     abstract void startMarkers(Pixel[][] src);
 
